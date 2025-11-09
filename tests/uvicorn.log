@@ -1,0 +1,96 @@
+nohup: 忽略输入
+INFO:     Will watch for changes in these directories: ['/home/twik/文档/RPT']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [15477] using WatchFiles
+INFO:     Started server process [15483]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     api_streaming_start called with filename=hf_record_10MHz_2000kHz_20251102_194110.h5, format=h5, sample_rate=2000000.0, center_freq=0.0, chunk_size=1024, update_interval=0.05
+INFO:     127.0.0.1:47226 - "POST /api/streaming/start HTTP/1.1" 200 OK
+ERROR:    h5_reader: iteration error: Unable to synchronously get dataspace (invalid dataset identifier)
+INFO:     127.0.0.1:43486 - "GET /api/streaming/data/3b20d878b4d44a94a98efa5abe2f2fd9 HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'utils/visualizer.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [15483]
+Process SpawnProcess-2:
+Traceback (most recent call last):
+  File "/home/twik/radioconda/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/twik/radioconda/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/twik/radioconda/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/twik/radioconda/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/twik/radioconda/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/twik/radioconda/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/twik/radioconda/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/home/twik/radioconda/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
+    config.load()
+  File "/home/twik/radioconda/lib/python3.12/site-packages/uvicorn/config.py", line 439, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/twik/radioconda/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/twik/radioconda/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/twik/文档/RPT/webui/app.py", line 13, in <module>
+    from main import HFReplaySystem
+  File "/home/twik/文档/RPT/main.py", line 14, in <module>
+    from modules.recorder import SignalRecorder
+  File "/home/twik/文档/RPT/modules/__init__.py", line 3, in <module>
+    from .generator import SignalGenerator
+  File "/home/twik/文档/RPT/modules/generator.py", line 5, in <module>
+    from utils.filters import FilterDesigner
+  File "/home/twik/文档/RPT/utils/__init__.py", line 2, in <module>
+    from .visualizer import SignalVisualizer
+  File "/home/twik/文档/RPT/utils/visualizer.py", line 539
+    reader = h5_reader()
+SyntaxError: expected 'except' or 'finally' block
+WARNING:  WatchFiles detected changes in 'utils/visualizer.py'. Reloading...
+INFO:     Started server process [16547]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     api_streaming_start called with filename=hf_record_10MHz_2000kHz_20251102_194110.h5, format=h5, sample_rate=2000000.0, center_freq=0.0, chunk_size=1024, update_interval=0.05
+INFO:     127.0.0.1:59570 - "POST /api/streaming/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32922 - "GET /api/streaming/data/1f8cb96f94664ff2b091668cc7e937a0 HTTP/1.1" 200 OK
+Exception in thread Thread-1 (worker):
+Traceback (most recent call last):
+  File "/home/twik/文档/RPT/utils/visualizer.py", line 570, in worker
+    self.streaming_sessions[session_id]['data'] = streams
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: '1f8cb96f94664ff2b091668cc7e937a0'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/twik/radioconda/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "/home/twik/radioconda/lib/python3.12/threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/twik/文档/RPT/utils/visualizer.py", line 579, in worker
+    self.streaming_sessions[session_id]['error'] = str(e)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: '1f8cb96f94664ff2b091668cc7e937a0'
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [16547]
+INFO:     Stopping reloader process [15477]

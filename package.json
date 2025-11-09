@@ -1,0 +1,16 @@
+{
+  "name": "rpt-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test:frontend": "jest --config=jest.config.js --runInBand",
+    "test": "npm run test:frontend",
+    "lint": "eslint webui/static tests --ext .js || true"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jsdom": "^22.1.0"
+  }
+}
