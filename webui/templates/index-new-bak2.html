@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPT - HF Signal Replay System</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        /* 主容器布局 */
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* 左侧面板 (1/5宽度) */
+        .left-panel {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        /* 中间面板 (3/5宽度) */
+        .center-panel {
+            flex: 3;
+            min-width: 0;
+        }
+        
+        /* 右侧面板 (1/5宽度) */
+        .right-panel {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        /* 面板通用样式 */
+        .panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            background: #e9ecef;
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .panel-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        /* 表单样式 */
+        .compact-form {
+            padding: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #6c757d;
+            box-shadow: 0 0 0 2px rgba(108, 117, 125, 0.1);
+        }
+        
+        /* 按钮样式 - 浅色系 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        .btn:hover {
+            background-color: #dee2e6;
+        }
+        
+        .btn-primary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        /* 文件操作按钮组 */
+        .file-actions {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        /* 表格样式 */
+        .file-table-container, .task-table-container {
+            overflow-x: auto;
+            padding: 0 15px 15px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        /* 表格操作按钮 - 统一宽度 */
+        .table-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .table-actions .btn {
+            flex: 1;
+            min-width: 60px;
+            text-align: center;
+            padding: 6px 8px;
+            font-size: 12px;
+        }
+        
+        /* 标签页样式 */
+        .tab-navigation {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            list-style: none;
+        }
+        
+        .tab-button {
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-button.active {
+            color: #495057;
+            border-bottom-color: #6c757d;
+        }
+        
+        .tab-content-area {
+            padding: 15px;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+		
+		
+        
+		/* Signal Analysis 图表布局样式 */
+		.tab-content-area {
+			border: 2px solid #007bff;
+			border-top: none;
+			border-radius: 0 0 8px 8px;
+			background: white;
+			padding: 12px;
+			margin-top: 0;
+			transition: all 0.25s ease;
+			aspect-ratio: 2 / 1;
+			min-height: 300px;
+			height: auto;
+		}
+        
+        .tab-panel {
+            display: none;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+        }
+        
+        .tab-panel.active {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+        }
+        
+        /* 图表容器基础样式 */
+		.chart-box {
+			background: white;
+			border: 1px solid #e0e0e0;
+			border-radius: 8px;
+			padding: 12px;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+			transition: all 0.25s ease;
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+			min-height: 0;
+		}
+        
+        .chart-box h4 {
+            margin: 0 0 12px 0;
+            color: #333;
+            font-size: 18px;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 8px;
+        }
+        
+		.chart-placeholder {
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex: 1;
+			min-height: 0;
+			color: #6c757d;
+			font-size: 16px;
+			background: #f8f9fa;
+			border: 2px dashed #adb5bd;
+			border-radius: 6px;
+			font-style: italic;
+			overflow: hidden;
+		}
+        
+        .chart-placeholder .placeholder-text {
+            position: relative;
+            z-index: 2;
+            padding: 8px 12px;
+        }
+        
+        .chart-placeholder canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            height: 100% !important;
+            display: none;
+            z-index: 3;
+        }
+        
+        /* Frequency Domain 和 Time Domain - 满铺显示 */
+        #frequency-domain-panel .chart-box,
+        #time-domain-panel .chart-box {
+            flex: 1;
+            min-height: 400px;
+        }
+        
+        #frequency-domain-panel .chart-placeholder,
+        #time-domain-panel .chart-placeholder {
+            min-height: 350px;
+        }
+        
+        /* Constellation Panel - 水平排列 */
+        #constellation-panel {
+            flex-direction: row !important;
+            gap: 16px;
+            align-items: stretch;
+        }
+        
+        #constellation-panel .chart-box {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        #constellation-panel .chart-placeholder {
+            aspect-ratio: 1 / 1;
+            min-height: 300px;
+        }
+        
+        /* Higher Order Panel - 水平排列 */
+        #higher-order-panel {
+            flex-direction: row !important;
+            gap: 16px;
+            align-items: stretch;
+        }
+        
+        #higher-order-panel .chart-box {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        #higher-order-panel .chart-placeholder {
+            aspect-ratio: 2 / 1;
+            min-height: 250px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            #constellation-panel,
+            #higher-order-panel {
+                flex-direction: column !important;
+            }
+            
+            #constellation-panel .chart-placeholder,
+            #higher-order-panel .chart-placeholder {
+                aspect-ratio: auto;
+                min-height: 280px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .tab-panel {
+                padding: 12px;
+                min-height: 400px;
+            }
+            
+            .chart-box, .higher-order-chart {
+                height: 300px;
+            }
+        }
+        
+        /* 操作网格 */
+        .operations-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .operation-panel {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .operation-panel h4 {
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: #495057;
+        }
+        
+        /* 原有样式保留 */
+        .signal-analysis-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 6px; 
+            padding: 8px; 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            border-bottom: none; 
+        }
+        
+        .analysis-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        
+        .file-info { 
+            padding: 8px 14px; 
+            background: #d1ecf1; 
+            border: 1px solid #bee5eb; 
+            border-radius: 6px; 
+            color: #0c5460; 
+            font-size: 14px; 
+            font-weight: 500; 
+        }
+        
+        .spectrum-scan-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 6px; 
+            padding: 8px; 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            border-bottom: none; 
+        }
+        
+        .spectrum-scan-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            flex-wrap: wrap; 
+        }
+        
+        .scan-parameters-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+            gap: 18px; 
+            align-items: center; 
+        }
+        
+        .scan-field { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+        }
+        
+        .scan-field label { 
+            font-weight: 600; 
+            color: #495057; 
+        }
+        
+        .scan-field input,
+        .scan-field select { 
+            width: 100%; 
+            padding: 8px 10px; 
+            border: 1px solid #ced4da; 
+            border-radius: 6px; 
+            font-size: 14px; 
+        }
+        
+        /* 频谱扫描按钮布局 */
+        .spectrum-scan-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .spectrum-scan-buttons .btn {
+            flex: 1;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .operations-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部标题 -->
+    <header style="background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); margin-bottom: 20px;">
+        <div class="header-main">
+            <h1 style="font-size: 24px; color: #495057; font-weight: 600;">RPT - HF Signal Replay System</h1>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 左侧面板 (1/5宽度) -->
+        <div class="left-panel">
+            <!-- Spectrum Scan -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📡 Spectrum Scan</h3>
+                </div>
+                <form id="spectrumScanForm" class="compact-form" onsubmit="event.preventDefault(); startSpectrumScan();">
+                    <div class="scan-parameters-grid">
+                        <div class="scan-field">
+                            <label for="scanStartFreq">Start Frequency (MHz)</label>
+                            <input type="number" id="scanStartFreq" name="start_freq" value="88.0" step="0.1" min="1" max="6000" required>
+                        </div>
+                        <div class="scan-field">
+                            <label for="scanStopFreq">Stop Frequency (MHz)</label>
+                            <input type="number" id="scanStopFreq" name="stop_freq" value="108.0" step="0.1" min="1" max="6000" required>
+                        </div>
+                        <div class="scan-field">
+                            <label for="scanWindow">Window Function</label>
+                            <select id="scanWindow" name="window">
+                                <option value="none" selected>None</option>
+                                <option value="hann">Hann</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="spectrum-scan-buttons">
+                        <button type="button" class="btn btn-primary" id="start-scan-btn" onclick="startSpectrumScan()">Start Scan</button>
+                        <button type="button" class="btn" id="stop-scan-btn" onclick="stopSpectrumScan()">Stop Scan</button>
+                           <button type="button" class="btn btn-primary" id="start-scan-btn" data-action="start-scan" data-old-onclick="startSpectrumScan()">Start Scan</button>
+                           <button type="button" class="btn" id="stop-scan-btn" data-action="stop-scan" data-old-onclick="stopSpectrumScan()">Stop Scan</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Signal Recording -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📹 Signal Recording</h3>
+                </div>
+                <form id="recordForm" class="compact-form">
+                    <div class="form-group">
+                        <label>Frequency (MHz)</label>
+                        <input type="number" name="freq" value="10" step="0.1" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Rate (Hz)</label>
+                        <select id="recordSampleRate" name="rate" required>
+                            <option value="1000000">1 MHz</option>
+                            <option value="2000000">2 MHz</option>
+                            <option value="5000000">5 MHz</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Gain (dB)</label>
+                        <input type="number" name="gain" value="30" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (s)</label>
+                        <input type="number" name="duration" value="5" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Channel</label>
+                        <input type="number" name="channel" value="0" min="0" max="3">
+                    </div>
+                    <div class="form-group">
+                        <label>Filename (optional)</label>
+                        <input type="text" name="filename" placeholder="auto_generate_if_empty">
+                    </div>
+                    <button id="record-start-btn" type="submit" class="btn btn-primary">Start Recording</button>
+                </form>
+            </div>
+
+            <!-- Signal Playback -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>▶️ Signal Playback</h3>
+                </div>
+                <form id="playForm" class="compact-form">
+                    <div class="form-group">
+                        <label>Select File</label>
+                        <select name="filename" id="playFileSelect" required>
+                            <option value="">Loading files...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>TX Frequency (MHz)</label>
+                        <input type="number" name="freq" value="100" step="0.1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>TX Sample Rate (Hz)</label>
+                        <select id="playSampleRate" name="rate" required>
+                            <option value="1000000">1 MHz</option>
+                            <option value="2000000">2 MHz</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>TX Gain (dB)</label>
+                        <input type="number" name="gain" value="25">
+                    </div>
+                    <div class="form-group">
+                        <label>TX Amplitude Scale</label>
+                        <input type="number" name="scale" value="1.0" step="0.1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Repeat Count</label>
+                        <input type="number" name="repeat" value="1" min="0">
+                    </div>
+                    <button id="play-start-btn" type="submit" class="btn btn-primary">Start Playback</button>
+                </form>
+            </div>
+
+            <!-- Signal Generation -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>🎛️ Signal Generation</h3>
+                </div>
+                <form id="generateForm" class="compact-form">
+                    <div class="form-group">
+                        <label>Center Frequency (MHz)</label>
+                        <input type="number" name="center_freq" value="100" step="0.1" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Symbol Rate (Hz)</label>
+                        <input type="number" name="symbol_rate" value="500000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Rate (Hz)</label>
+                        <select id="generateSampleRate" name="sample_rate" required>
+                            <option value="1000000">1 MHz</option>
+                            <option value="2000000">2 MHz</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (s)</label>
+                        <input type="number" name="duration" value="1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Save File (optional)</label>
+                        <input type="text" name="save_file" placeholder="qpsk_signal.h5">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="transmit"> Transmit after generation
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate QPSK</button>
+                </form>
+            </div>
+
+            <!-- Format Conversion -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>🔄 Format Conversion</h3>
+                </div>
+                <form id="convertForm" class="compact-form">
+                    <div class="form-group">
+                        <label>Select File</label>
+                        <select name="filename" id="convertFileSelect" required>
+                            <option value="">Loading files...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Format</label>
+                        <select name="format" required>
+                            <option value="wav">WAV</option>
+                            <option value="csv">CSV</option>
+                            <option value="npy">NPY</option>
+                            <option value="h5">HDF5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Output Filename (optional)</label>
+                        <input type="text" name="output" placeholder="auto_generate">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Convert</button>
+                </form>
+            </div>
+
+            <!-- Signal Analysis Results -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📊 Signal Analysis Results</h3>
+                </div>
+                <div class="compact-form">
+                    <div class="form-group">
+                        <label>SNR (dB)</label>
+                        <input type="text" value="24.5" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Peak Frequency (MHz)</label>
+                        <input type="text" value="98.7" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Bandwidth (kHz)</label>
+                        <input type="text" value="200" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Modulation Type</label>
+                        <input type="text" value="QPSK" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间面板 (3/5宽度) -->
+        <div class="center-panel">
+            <!-- Signal Analysis -->
+            <div class="panel">
+                <div class="panel-header signal-analysis-header">
+                    <h3>📊 Signal Analysis</h3>
+                    <div class="analysis-controls">
+                        <span id="selected-file-info" class="file-info">No file selected</span>
+                        <span id="stream-frame-counter" class="file-info">Frame --</span>
+                        <button type="button" class="btn btn-primary btn-sm" id="start-stream-btn"><i class="fas fa-play"></i> Start</button>
+                        <button type="button" class="btn btn-sm" id="stop-stream-btn" disabled><i class="fas fa-stop"></i> Stop</button>
+                    </div>
+                </div>
+
+                <!-- Tab 导航 -->
+                <div class="tab-navigation">
+                    <ul class="tab-buttons">
+                        <li class="tab-button active" data-tab="frequency-domain">Frequency Domain</li>
+                        <li class="tab-button" data-tab="time-domain">Time Domain</li>
+                        <li class="tab-button" data-tab="constellation">Constellation</li>
+                        <li class="tab-button" data-tab="higher-order">Higher Order</li>
+                    </ul>
+                </div>
+
+                <div class="tab-content-area">
+                    <!-- Frequency Domain -->
+                    <div class="tab-panel active" id="frequency-domain-panel">
+                        <div class="chart-box">
+                            <h4>Frequency Spectrum</h4>
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">Waiting for analysis data...</span>
+                                <canvas id="frequencyDomainChart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Domain -->
+                    <div class="tab-panel" id="time-domain-panel">
+                        <div class="chart-box">
+                            <h4>Time Domain Signal</h4>
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">Waiting for analysis data...</span>
+                                <canvas id="timeDomainChart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Constellation -->
+                    <div class="tab-panel" id="constellation-panel">
+                        <div class="chart-box">
+                            <h4>Constellation Diagram</h4>
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">Waiting for analysis data...</span>
+                                <canvas id="constellationChart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h4>Eye Diagram</h4>
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">Waiting for analysis data...</span>
+                                <canvas id="eyeDiagramChart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Higher Order -->
+                    <div class="tab-panel" id="higher-order-panel">
+                        <div class="chart-box">
+                            <h4>M2 Statistics</h4>
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">Waiting for analysis data...</span>
+                                <canvas id="m2Chart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h4>M4 Statistics</h4>
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">Waiting for analysis data...</span>
+                                <canvas id="m4Chart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Management -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📁 File Management</h3>
+                </div>
+                <div class="file-actions">
+                    <input type="file" id="fileInput" accept=".h5,.dat,.complex,.raw,.bin,.wav,.csv,.npy" multiple style="display: none;">
+                    <button data-action="upload-files" data-old-onclick="document.getElementById('fileInput').click()"  class="btn btn-primary">Upload Files</button>
+                    <button onclick="refreshFileListDebug()" class="btn">Refresh List</button>
+                    <button onclick="rptUI.clearAllPlots()" class="btn">Clear Plots</button>
+                    <button onclick="rptUI.deleteAllFiles()" class="btn">Delete All</button>
+                       <button data-action="upload-files" data-old-onclick="document.getElementById('fileInput').click()" class="btn btn-primary">Upload Files</button>
+                       <button data-action="refresh-list" data-old-onclick="refreshFileListDebug()" class="btn">Refresh List</button>
+                       <button data-action="clear-plots" data-old-onclick="rptUI.clearAllPlots()" class="btn">Clear Plots</button>
+                       <button data-action="delete-all" data-old-onclick="rptUI.deleteAllFiles()" class="btn">Delete All</button>
+                </div>
+
+                <div class="file-table-container">
+                    <table id="fileTable" class="file-table">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Filename</th>
+                                <th>Data Type</th>
+                                <th>File Size</th>
+                                <th>Samples</th>
+                                <th>Sample Rate</th>
+                                <th>Center Freq</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fileTableBody">
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>recording_001.h5</td>
+                                <td>Complex64</td>
+                                <td>2.4 MB</td>
+                                <td>1,200,000</td>
+                                <td>1 MHz</td>
+                                <td>98.5 MHz</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn btn-sm">Analyze</button>
+                                        <button class="btn btn-sm">Download</button>
+                                        <button class="btn btn-sm">Info</button>
+                                        <button class="btn btn-sm">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>qpsk_signal.dat</td>
+                                <td>Complex64</td>
+                                <td>1.8 MB</td>
+                                <td>900,000</td>
+                                <td>2 MHz</td>
+                                <td>100 MHz</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn btn-sm">Analyze</button>
+                                        <button class="btn btn-sm">Download</button>
+                                        <button class="btn btn-sm">Info</button>
+                                        <button class="btn btn-sm">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Task Monitor -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📊 Task Monitor</h3>
+                </div>
+                <div class="task-table-container">
+                    <table id="taskTable" class="task-table">
+                        <thead>
+                            <tr>
+                                <th>Task Type</th>
+                                <th>Filename</th>
+                                <th>Data Type</th>
+                                <th>Progress</th>
+                                <th>Execution Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody">
+                            <tr>
+                                <td>Recording</td>
+                                <td>recording_002.h5</td>
+                                <td>Complex64</td>
+                                <td>
+                                    <div style="background: #e9ecef; height: 8px; border-radius: 4px;">
+                                        <div style="background: #6c757d; width: 75%; height: 100%; border-radius: 4px;"></div>
+                                    </div>
+                                </td>
+                                <td>00:02:15</td>
+                                <td>Running</td>
+                                <td>
+                                    <button class="btn btn-sm">Stop</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Analysis</td>
+                                <td>qpsk_signal.dat</td>
+                                <td>Complex64</td>
+                                <td>
+                                    <div style="background: #e9ecef; height: 8px; border-radius: 4px;">
+                                        <div style="background: #6c757d; width: 100%; height: 100%; border-radius: 4px;"></div>
+                                    </div>
+                                </td>
+                                <td>00:00:45</td>
+                                <td>Completed</td>
+                                <td>
+                                    <button class="btn btn-sm">View</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- File Preview -->
+            <div id="previewPanel" class="panel" style="display: none;">
+                <div class="panel-header">
+                    <h3>📊 File Preview</h3>
+                    <div>
+                        <button class="btn btn-sm" onclick="rptUI.closePreview()">Close</button>
+                        <button class="btn btn-sm btn-primary" onclick="rptUI.analyzeFromPreview()">Full Analysis</button>
+                           <button class="btn btn-sm" data-action="close-preview" data-old-onclick="rptUI.closePreview()">Close</button>
+                           <button class="btn btn-sm btn-primary" data-action="analyze-preview" data-old-onclick="rptUI.analyzeFromPreview()">Full Analysis</button>
+                    </div>
+                </div>
+                <div class="compact-form">
+                    <div id="previewLoading" class="preview-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading preview data...</p>
+                    </div>
+
+                    <div id="previewContent" class="preview-content" style="display: none;">
+                        <div class="preview-info" style="display: flex; gap: 16px; margin-bottom: 15px;">
+                            <div class="preview-info-item"><label>Filename:</label> <span id="previewFilename">-</span></div>
+                            <div class="preview-info-item"><label>Sample Rate:</label> <span id="previewSampleRate">-</span></div>
+                            <div class="preview-info-item"><label>Total Samples:</label> <span id="previewTotalSamples">-</span></div>
+                            <div class="preview-info-item"><label>Preview Samples:</label> <span id="previewSamplesCount">-</span></div>
+                        </div>
+
+                        <div class="preview-tabs" style="margin-bottom: 10px;">
+                            <button class="btn btn-sm active">Time Domain</button>
+                            <button class="btn btn-sm">Magnitude</button>
+                            <button class="btn btn-sm">Phase</button>
+                            <button class="btn btn-sm">I/Q Scatter</button>
+                        </div>
+
+                        <div class="preview-charts">
+                            <div class="chart-box">
+                                <h4>Preview Chart</h4>
+                                <div class="chart-placeholder">
+                                    Preview data visualization
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="previewError" class="preview-error" style="display: none;">
+                        <div>❌</div>
+                        <p id="previewErrorMessage">Failed to load preview data</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧面板 (1/5宽度) -->
+        <div class="right-panel">
+            <!-- Connection -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>🔌 Connection</h3>
+                </div>
+                <div class="compact-form">
+                    <div class="form-group">
+                        <label>Network Connection</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="usrpIpInput" placeholder="USRP IP (e.g., 192.168.10.2)" value="192.168.10.2" style="flex: 1;">
+                            <button id="connectBtn" class="btn btn-primary">Connect</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <div id="usrpStatus" style="padding: 8px 14px; background: #dc3545; color: white; border-radius: 6px; font-size: 14px; font-weight: bold;">USRP: Not connected</div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" style="width: 100%;">Get USRP Info</button>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn" style="width: 100%;">Reset USRP</button>
+                    </div>
+                    <div class="form-group">
+                        <button id="config-btn" class="btn btn-primary" style="width: 100%;" title="Configuration (Shift+click for modal)">
+                            Configuration
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RX Parameters -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📡 RX Parameters</h3>
+                </div>
+                <div class="compact-form">
+                    <div class="form-group">
+                        <label>RX Gain (dB)</label>
+                        <input type="number" value="30" min="0" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label>RX Antenna Port</label>
+                        <select>
+                            <option>RX1</option>
+                            <option>RX2</option>
+                            <option>RX3</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;">Apply RX Settings</button>
+                </div>
+            </div>
+
+            <!-- TX Parameters -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📤 TX Parameters</h3>
+                </div>
+                <div class="compact-form">
+                    <div class="form-group">
+                        <label>TX Gain (dB)</label>
+                        <input type="number" value="25" min="0" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label>TX Antenna Port</label>
+                        <select>
+                            <option>TX1</option>
+                            <option>TX2</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;">Apply TX Settings</button>
+                </div>
+            </div>
+
+            <!-- Synchronization -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>⏱️ Synchronization</h3>
+                </div>
+                <div class="compact-form">
+                    <div class="form-group">
+                        <label>Clock Source</label>
+                        <select>
+                            <option>Internal</option>
+                            <option>External</option>
+                            <option>GPS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Source</label>
+                        <select>
+                            <option>Internal</option>
+                            <option>External</option>
+                            <option>GPS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>PPS Source</label>
+                        <select>
+                            <option>Internal</option>
+                            <option>External</option>
+                            <option>GPS</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;">Apply Sync Settings</button>
+                </div>
+            </div>
+
+            <!-- Device Information -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>ℹ️ Device Information</h3>
+                </div>
+                <div class="compact-form">
+                    <div class="form-group">
+                        <label>Device Model</label>
+                        <input type="text" value="USRP B210" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Serial Number</label>
+                        <input type="text" value="ABC123XYZ" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Firmware Version</label>
+                        <input type="text" value="v4.0.1" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>FPGA Version</label>
+                        <input type="text" value="v3.15.0" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+    // Expansion toggle disabled per latest requirements
+    </script>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

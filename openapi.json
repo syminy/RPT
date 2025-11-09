@@ -1,0 +1,1539 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RPT Web UI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/config": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get Configuration",
+        "operationId": "get_configuration_api_config_get",
+        "parameters": [
+          {
+            "name": "section",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Section"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/sections": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get Config Sections",
+        "operationId": "get_config_sections_api_config_sections_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/{section}": {
+      "post": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Update Configuration",
+        "operationId": "update_configuration_api_config__section__post",
+        "parameters": [
+          {
+            "name": "section",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Section"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/reset/{section}": {
+      "post": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Reset Configuration",
+        "operationId": "reset_configuration_api_config_reset__section__post",
+        "parameters": [
+          {
+            "name": "section",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Section"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/reset": {
+      "post": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Reset All Configuration",
+        "operationId": "reset_all_configuration_api_config_reset_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/backup/create": {
+      "post": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Create Configuration Backup",
+        "operationId": "create_configuration_backup_api_config_backup_create_post",
+        "parameters": [
+          {
+            "name": "backup_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Backup Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/validation/rules": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get Validation Rules",
+        "operationId": "get_validation_rules_api_config_validation_rules_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/health": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Configuration Health",
+        "operationId": "configuration_health_api_config_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/spectrum-scan/start": {
+      "post": {
+        "tags": [
+          "spectrum-scan"
+        ],
+        "summary": "Start Spectrum Scan",
+        "description": "启动频谱扫描",
+        "operationId": "start_spectrum_scan_api_spectrum_scan_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/spectrum-scan/stop": {
+      "post": {
+        "tags": [
+          "spectrum-scan"
+        ],
+        "summary": "Stop Spectrum Scan",
+        "description": "停止频谱扫描",
+        "operationId": "stop_spectrum_scan_api_spectrum_scan_stop_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Index",
+        "operationId": "index__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/config": {
+      "get": {
+        "summary": "Config Page",
+        "operationId": "config_page_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/status": {
+      "get": {
+        "summary": "Api Status",
+        "operationId": "api_status_api_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generate": {
+      "post": {
+        "summary": "Api Generate",
+        "description": "生成QPSK信号并可选保存/发送",
+        "operationId": "api_generate_api_generate_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_generate_api_generate_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/upload": {
+      "post": {
+        "summary": "Api Upload",
+        "operationId": "api_upload_api_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_upload_api_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files": {
+      "get": {
+        "summary": "Api Files",
+        "operationId": "api_files_api_files_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete All Files",
+        "description": "删除所有文件",
+        "operationId": "delete_all_files_api_files_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/debug/log": {
+      "post": {
+        "summary": "Api Debug Log",
+        "description": "Lightweight endpoint to accept client-side debug messages for terminal logging.",
+        "operationId": "api_debug_log_api_debug_log_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Payload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files/{filename}": {
+      "get": {
+        "summary": "Get File Info",
+        "description": "获取单个文件的详细信息",
+        "operationId": "get_file_info_api_files__filename__get",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete File",
+        "description": "删除单个文件",
+        "operationId": "delete_file_api_files__filename__delete",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files/{filename}/preview": {
+      "get": {
+        "summary": "Get File Preview",
+        "description": "获取文件预览数据（限制样本数量以控制流量）",
+        "operationId": "get_file_preview_api_files__filename__preview_get",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          },
+          {
+            "name": "max_samples",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1000,
+              "title": "Max Samples"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analyze": {
+      "post": {
+        "summary": "Api Analyze",
+        "operationId": "api_analyze_api_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_analyze_api_analyze_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks/{task_id}/cancel": {
+      "post": {
+        "summary": "Api Cancel Task",
+        "operationId": "api_cancel_task_api_tasks__task_id__cancel_post",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/{task_id}": {
+      "get": {
+        "summary": "Get Analysis Result",
+        "description": "Return task status/result for a previously submitted analysis task.",
+        "operationId": "get_analysis_result_api_analysis__task_id__get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/plots/{filename}": {
+      "get": {
+        "summary": "Get Plot File",
+        "operationId": "get_plot_file_files_plots__filename__get",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/streaming/start": {
+      "post": {
+        "summary": "Start Streaming",
+        "description": "启动流式处理并应用配置重写",
+        "operationId": "start_streaming_api_streaming_start_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_start_streaming_api_streaming_start_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/streaming/presets": {
+      "get": {
+        "summary": "Get Streaming Presets",
+        "description": "获取预设的流式处理配置",
+        "operationId": "get_streaming_presets_api_streaming_presets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/streaming/data/{session_id}": {
+      "get": {
+        "summary": "Streaming Data Sse",
+        "description": "Server-Sent Events endpoint that streams JSON updates for a session.",
+        "operationId": "streaming_data_sse_api_streaming_data__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/streaming/sessions": {
+      "get": {
+        "summary": "List Streaming Sessions",
+        "operationId": "list_streaming_sessions_api_streaming_sessions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/streaming/stop/{session_id}": {
+      "post": {
+        "summary": "Stop Streaming Session",
+        "operationId": "stop_streaming_session_api_streaming_stop__session_id__post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ws_stream/start": {
+      "post": {
+        "summary": "Ws Start Stream",
+        "operationId": "ws_start_stream_api_ws_stream_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamingStartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/convert": {
+      "post": {
+        "summary": "Api Convert",
+        "operationId": "api_convert_api_convert_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_convert_api_convert_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play": {
+      "post": {
+        "summary": "Api Play",
+        "operationId": "api_play_api_play_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_play_api_play_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{filename}": {
+      "get": {
+        "summary": "Download File",
+        "operationId": "download_file_files__filename__get",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connect": {
+      "post": {
+        "summary": "Api Connect",
+        "description": "Connect to USRP. Accepts optional JSON/Form field 'ip' or 'address'.",
+        "operationId": "api_connect_api_connect_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/record": {
+      "post": {
+        "summary": "Api Record",
+        "description": "Start a recording in the background. Accepts JSON body with recording params.",
+        "operationId": "api_record_api_record_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks/{task_id}": {
+      "get": {
+        "summary": "Api Task Status",
+        "operationId": "api_task_status_api_tasks__task_id__get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks": {
+      "get": {
+        "summary": "Api List Tasks",
+        "operationId": "api_list_tasks_api_tasks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_api_analyze_api_analyze_post": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename"
+        ],
+        "title": "Body_api_analyze_api_analyze_post"
+      },
+      "Body_api_convert_api_convert_post": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format"
+          },
+          "output": {
+            "type": "string",
+            "title": "Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "format"
+        ],
+        "title": "Body_api_convert_api_convert_post"
+      },
+      "Body_api_generate_api_generate_post": {
+        "properties": {
+          "center_freq": {
+            "type": "number",
+            "title": "Center Freq",
+            "default": 100000000.0
+          },
+          "symbol_rate": {
+            "type": "number",
+            "title": "Symbol Rate",
+            "default": 500000.0
+          },
+          "sample_rate": {
+            "type": "number",
+            "title": "Sample Rate",
+            "default": 2000000.0
+          },
+          "tx_gain": {
+            "type": "number",
+            "title": "Tx Gain",
+            "default": 25.0
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration",
+            "default": 0.0
+          },
+          "channel": {
+            "type": "integer",
+            "title": "Channel",
+            "default": 0
+          },
+          "save_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Save File"
+          },
+          "transmit": {
+            "type": "boolean",
+            "title": "Transmit",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "Body_api_generate_api_generate_post"
+      },
+      "Body_api_play_api_play_post": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "freq": {
+            "type": "number",
+            "title": "Freq"
+          },
+          "rate": {
+            "type": "number",
+            "title": "Rate"
+          },
+          "gain": {
+            "type": "number",
+            "title": "Gain",
+            "default": 25.0
+          },
+          "channel": {
+            "type": "integer",
+            "title": "Channel",
+            "default": 0
+          },
+          "repeat": {
+            "type": "integer",
+            "title": "Repeat",
+            "default": 1
+          },
+          "scale": {
+            "type": "number",
+            "title": "Scale",
+            "default": 1.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename"
+        ],
+        "title": "Body_api_play_api_play_post"
+      },
+      "Body_api_upload_api_upload_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_api_upload_api_upload_post"
+      },
+      "Body_start_streaming_api_streaming_start_post": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "file_format": {
+            "type": "string",
+            "title": "File Format",
+            "default": "auto"
+          },
+          "sample_rate": {
+            "type": "number",
+            "title": "Sample Rate"
+          },
+          "center_freq": {
+            "type": "number",
+            "title": "Center Freq"
+          },
+          "target_fps": {
+            "type": "number",
+            "title": "Target Fps"
+          },
+          "target_freq_resolution": {
+            "type": "number",
+            "title": "Target Freq Resolution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename"
+        ],
+        "title": "Body_start_streaming_api_streaming_start_post"
+      },
+      "ConfigUpdateRequest": {
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ConfigUpdateRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ScanRequest": {
+        "properties": {
+          "start_freq": {
+            "type": "number",
+            "title": "Start Freq",
+            "default": 88000000.0
+          },
+          "stop_freq": {
+            "type": "number",
+            "title": "Stop Freq",
+            "default": 108000000.0
+          },
+          "resolution": {
+            "type": "number",
+            "title": "Resolution",
+            "default": 100000.0
+          },
+          "dwell_time": {
+            "type": "number",
+            "title": "Dwell Time",
+            "default": 0.1
+          },
+          "sample_rate": {
+            "type": "number",
+            "title": "Sample Rate",
+            "default": 2000000.0
+          },
+          "avg_count": {
+            "type": "integer",
+            "title": "Avg Count",
+            "default": 1
+          },
+          "overlap": {
+            "type": "number",
+            "title": "Overlap",
+            "default": 0.0
+          },
+          "scan_interval": {
+            "type": "number",
+            "title": "Scan Interval",
+            "default": 0.0
+          },
+          "continuous": {
+            "type": "boolean",
+            "title": "Continuous",
+            "default": true
+          },
+          "fft_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fft Size"
+          },
+          "preset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preset"
+          },
+          "max_segments": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Segments"
+          }
+        },
+        "type": "object",
+        "title": "ScanRequest"
+      },
+      "StreamingStartRequest": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "description": "Filename relative to uploads directory"
+          },
+          "sample_rate": {
+            "type": "number",
+            "title": "Sample Rate",
+            "description": "Sample rate in Hz",
+            "default": 1000000.0
+          },
+          "center_freq": {
+            "type": "number",
+            "title": "Center Freq",
+            "description": "Center frequency in Hz",
+            "default": 0.0
+          },
+          "chunk_size": {
+            "type": "integer",
+            "title": "Chunk Size",
+            "description": "Processing chunk size in samples",
+            "default": 4096
+          },
+          "update_interval": {
+            "type": "number",
+            "title": "Update Interval",
+            "description": "Seconds between updates",
+            "default": 0.1
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename"
+        ],
+        "title": "StreamingStartRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
