@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统配置 - RPT</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .config-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .config-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .config-nav button {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .config-nav button.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .config-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .config-section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .config-item {
+            margin-bottom: 15px;
+        }
+        .config-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        .config-item input,
+        .config-item select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .config-actions {
+            text-align: right;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .field-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        input.error {
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 系统配置 - RPT</h1>
+        </header>
+
+        <div class="config-container">
+            <!-- 配置导航 -->
+            <div class="config-nav" id="config-nav">
+                <!-- 通过JavaScript动态生成 -->
+            </div>
+
+            <!-- 配置内容 -->
+            <div id="config-content">
+                <div class="config-section">
+                    <h3 id="section-title">选择配置章节</h3>
+                    <p>请从上方导航选择要配置的章节</p>
+                </div>
+            </div>
+
+            <!-- 全局操作 -->
+            <div class="config-actions">
+                <button class="btn btn-primary" onclick="saveCurrentSection()">保存当前章节</button>
+                <button class="btn btn-success" onclick="saveAllConfig()">保存所有配置</button>
+                <button class="btn btn-warning" onclick="resetCurrentSection()">重置当前章节</button>
+                <button class="btn btn-danger" onclick="resetAllConfig()">重置所有配置</button>
+                <button class="btn btn-info" onclick="createBackup()">创建备份</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/config.js"></script>
+</body>
+</html>

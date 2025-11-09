@@ -21,6 +21,35 @@
         case 'delete-all': if (window.rptUI && typeof window.rptUI.deleteAllFiles==='function') window.rptUI.deleteAllFiles(ev); break
         case 'close-preview': if (window.rptUI && typeof window.rptUI.closePreview==='function') window.rptUI.closePreview(ev); break
         case 'analyze-preview': if (window.rptUI && typeof window.rptUI.analyzeFromPreview==='function') window.rptUI.analyzeFromPreview(ev); break
+        // Config page delegated actions
+        case 'save-config':
+          if (typeof window.saveCurrentSection === 'function') {
+            try { window.saveCurrentSection(ev); } catch(e){ console.error('save-config handler error', e) }
+          }
+          break
+        case 'save-all-config':
+          if (typeof window.saveAllConfig === 'function') {
+            try { window.saveAllConfig(ev); } catch(e){ console.error('save-all-config handler error', e) }
+          }
+          break
+        case 'reset-config':
+          // destructive - ask for confirmation first
+          if (confirm && !confirm('这是一个破坏性操作，确定要重置当前章节吗？')) break
+          if (typeof window.resetCurrentSection === 'function') {
+            try { window.resetCurrentSection(ev); } catch(e){ console.error('reset-config handler error', e) }
+          }
+          break
+        case 'reset-all-config':
+          if (confirm && !confirm('这是一个破坏性操作，确定要重置所有配置吗？')) break
+          if (typeof window.resetAllConfig === 'function') {
+            try { window.resetAllConfig(ev); } catch(e){ console.error('reset-all-config handler error', e) }
+          }
+          break
+        case 'create-backup':
+          if (typeof window.createBackup === 'function') {
+            try { window.createBackup(ev); } catch(e){ console.error('create-backup handler error', e) }
+          }
+          break
         default:
           // unknown action: noop
       }
