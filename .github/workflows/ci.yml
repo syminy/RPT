@@ -5,6 +5,8 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  # Allow manual triggering from the UI or `gh workflow run`
+  workflow_dispatch: {}
 
 jobs:
   frontend:
@@ -21,6 +23,15 @@ jobs:
 
       - name: Install frontend dependencies
         run: npm ci
+
+      - name: Set up Python for smoke checks
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run smoke checks (templates & data stability)
+        run: |
+          bash ./scripts/run_smoke_checks_fixed.sh
 
       - name: Lint (ESLint)
         run: npm run lint --silent
@@ -56,10 +67,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # Ensure test runner and coverage are available on PATH; call via `python -m pytest` below
+          python -m pip install pytest pytest-cov
 
       - name: Run pytest (skip integration/hardware tests)
         run: |
-          pytest -q --maxfail=1 --disable-warnings --cov=./ --cov-report=xml:coverage.xml tests -k "not integration and not webui and not spectrum and not realtime"
+          # Use python -m pytest to avoid relying on the pytest console_script being on PATH
+          python -m pytest -q --maxfail=1 --disable-warnings --cov=./ --cov-report=xml:coverage.xml tests -k "not integration and not webui and not spectrum and not realtime"
 
       - name: Upload pytest artifacts
         if: always()
@@ -69,8 +83,17 @@ jobs:
           path: .pytest_cache
 
       - name: Upload coverage to Codecov
-        if: always()
+        # Only attempt upload when a Codecov token is provided to avoid failing the job in public forks
+        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v4
         with:
           files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
+
+      - name: Persist coverage.xml when Codecov token is missing
+        if: ${{ secrets.CODECOV_TOKEN == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
