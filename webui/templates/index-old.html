@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPT - HF Signal Replay System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style id="signal-analysis-final">
+        /* Signal Analysis 整体容器 */
+    .signal-analysis-section { margin-bottom: 0; }
+    /* Make panel headers more compact so content is closer to the header */
+    .panel-header { margin-bottom: 6px; padding-bottom: 6px; }
+        .signal-analysis-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding: 8px; background: #f8f9fa; border: 1px solid #dee2e6; border-bottom: none; }
+        .analysis-controls { display: flex; align-items: center; gap: 10px; }
+        .tab-navigation { background: #f8f9fa; border: 2px solid #007bff; border-bottom: none; border-radius: 8px 8px 0 0; padding: 8px 8px 0 8px; margin-bottom: 0; }
+        .tab-buttons { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+    .tab-button { padding: 10px 20px; background: #e9ecef; border: 1px solid #ced4da; border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; transition: all 0.25s ease; font-weight: 500; color: #495057; }
+    .tab-button.push-right { margin-left: auto; }
+        .tab-button:hover { background: #dee2e6; }
+        .tab-button.active { background: #007bff; color: white; border-color: #007bff; position: relative; z-index: 1; }
+        /* Reduced outer padding so gap between outer frame and inner chart is smaller */
+    .tab-content-area { border: 2px solid #007bff; border-top: none; border-radius: 0 0 8px 8px; background: white; padding: 12px; margin-top: 0; transition: all 0.25s ease; }
+    .tab-content-area.expanded { min-height: 0; }
+    .tab-panel { display: none; padding: 0; margin: 0; }
+    .tab-panel.active { display: flex; flex-direction: column; gap: 12px; }
+        /* Reduced padding in chart-box to bring it closer to outer frame */
+    .chart-box { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.25s ease; display: flex; flex-direction: column; }
+    .tab-content-area.expanded .chart-box { padding: 14px; }
+        .chart-box h4 { margin: 0 0 12px 0; color: #333; font-size: 18px; border-bottom: 2px solid #f8f9fa; padding-bottom: 8px; cursor: pointer; }
+        .chart-box canvas { width: 100% !important; height: 100% !important; background: #f8f9fa; border-radius: 4px; }
+    #constellation-panel { flex-direction: row; justify-content: flex-start; align-items: stretch; gap: 16px; }
+    #constellation-panel .chart-box { flex: 1 1 50%; max-width: 50%; align-self: stretch; }
+    #constellation-panel .chart-box.constellation-box .chart-placeholder { width: 100%; aspect-ratio: 1 / 1; min-height: 0; }
+    #constellation-panel .chart-box.eye-diagram-box .chart-placeholder { width: 100%; aspect-ratio: 4 / 3; min-height: 0; }
+    /* Ensure canvases are visible when JS toggles panels or when switching tabs */
+    .tab-content-area canvas { display: block !important; visibility: visible !important; }
+    .higher-order-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .higher-order-chart { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.25s ease; display: flex; flex-direction: column; }
+    .tab-content-area.expanded .higher-order-chart { padding: 14px; }
+        .higher-order-chart h5 { margin: 0 0 12px 0; color: #333; font-size: 16px; border-bottom: 2px solid #f8f9fa; padding-bottom: 8px; text-align: center; cursor: pointer; }
+        .higher-order-chart canvas { width: 100% !important; height: 100% !important; background: #f8f9fa; border-radius: 4px; }
+        .file-info { padding: 8px 14px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 6px; color: #0c5460; font-size: 14px; font-weight: 500; }
+        .status-badge { padding: 8px 14px; background: #6c757d; color: white; border-radius: 6px; font-size: 14px; font-weight: bold; }
+        .status-badge.ready { background: #6c757d; }
+        .status-badge.streaming { background: #28a745; }
+        .status-badge.error { background: #dc3545; }
+        .status-badge.stopped { background: #ffc107; color: #212529; }
+        .btn { padding: 8px 16px; border: 2px solid; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.25s ease; }
+        .btn-primary { background: #007bff; border-color: #007bff; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #0056b3; border-color: #0056b3; }
+        .btn-danger { background: #dc3545; border-color: #dc3545; color: white; }
+        .btn-danger:hover:not(:disabled) { background: #c82333; border-color: #bd2130; }
+        .btn:disabled { background: #6c757d; border-color: #6c757d; cursor: not-allowed; opacity: 0.6; }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        /* Spectrum Scan 板块样式 */
+    .spectrum-scan-section { margin-bottom: 0; }
+    .spectrum-scan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding: 8px; background: #f8f9fa; border: 1px solid #dee2e6; border-bottom: none; }
+        .spectrum-scan-header h3 { margin: 0; font-size: 20px; color: #212529; }
+    .spectrum-scan-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .spectrum-scan-controls .btn { min-width: 120px; }
+    .spectrum-scan-controls .preset-info { padding: 6px 12px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 14px; font-size: 13px; color: #495057; }
+            .spectrum-scan-form { border: 1px solid #dee2e6; border-radius: 8px; background: white; padding: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .scan-parameters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; align-items: center; }
+    .scan-field { display: flex; flex-direction: column; gap: 4px; }
+        .scan-field label { font-weight: 600; color: #495057; }
+    .scan-field-inline { flex-direction: row; align-items: center; gap: 4px; }
+        .scan-field-inline label { margin: 0; min-width: 0; margin-right: 4px; }
+    .scan-field-inline input { flex: 1; }
+    .scan-field-inline select { flex: 1; }
+    .scan-field input,
+    .scan-field select { width: 100%; padding: 8px 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+        .scan-field input:focus,
+        .scan-field select:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); outline: none; }
+    .scan-field.checkbox-field { display: flex; align-items: center; gap: 4px; }
+    .scan-field.checkbox-field label { margin: 0; font-weight: 600; color: #495057; }
+    .scan-field.checkbox-field input { width: auto; padding: 0; }
+    .chart-placeholder { position: relative; display: flex; align-items: center; justify-content: center; flex: 1; min-height: 280px; color: #6c757d; font-size: 16px; background: #f8f9fa; border: 2px dashed #adb5bd; border-radius: 6px; font-style: italic; overflow: hidden; }
+    .chart-placeholder .placeholder-text { position: relative; z-index: 2; padding: 8px 12px; }
+    .chart-placeholder canvas { position: absolute; left: 0; top: 0; width: 100% !important; height: 100% !important; display: none; z-index: 3; }
+    /* When JS marks a placeholder as having a visible canvas, hide the placeholder text and show the canvas */
+    .chart-placeholder.canvas-visible .placeholder-text { display: none; }
+    .chart-placeholder.canvas-visible canvas { display: block; }
+        /* Make headings visually clickable */
+        .chart-box h4:hover, .higher-order-chart h5:hover { opacity: 0.95; transform: translateY(-1px); }
+    @media (max-width: 992px) { #constellation-panel { flex-direction: column; } #constellation-panel .chart-box { flex: 0 0 100%; max-width: 100%; } #constellation-panel .chart-box .chart-placeholder { aspect-ratio: auto; min-height: 280px; } }
+    @media (max-width: 768px) { .signal-analysis-header { flex-direction: column; gap: 12px; align-items: stretch; } .analysis-controls { flex-wrap: wrap; justify-content: center; gap: 8px; } .higher-order-grid { grid-template-columns: 1fr; gap: 12px; } .chart-box, .higher-order-chart { height: 300px; } .tab-buttons { flex-wrap: wrap; } .tab-button { flex: 1; min-width: 140px; text-align: center; padding: 10px 16px; } .tab-button.push-right { margin-left: 0; } .tab-panel { padding: 12px; min-height: 400px; } .scan-parameters-grid { grid-template-columns: 1fr; } .spectrum-scan-header { flex-direction: column; align-items: stretch; gap: 12px; } .spectrum-scan-controls { justify-content: space-between; flex-wrap: wrap; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题和状态栏 -->
+        <header>
+            <div class="header-main">
+                <h1>RPT - HF Signal Replay System</h1>
+                <div class="status-bar">
+                    <div id="usrpStatus" class="status-pill disconnected">USRP: <span id="usrpStatusText">Not connected</span></div>
+                    <div class="ip-input-group">
+                        <input type="text" id="usrpIpInput" placeholder="USRP IP (e.g., 192.168.10.2)" value="192.168.10.2">
+                        <button id="connectBtn">Connect</button>
+                    </div>
+                    <button id="config-btn" class="btn btn-primary" title="Configuration (Shift+click for modal)">
+                        Configuration
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 频谱扫描板块 -->
+        <div class="full-width-panel">
+            <div class="panel">
+                <div class="panel-header spectrum-scan-header">
+                    <h3>📡 Spectrum Scan</h3>
+                    <div class="spectrum-scan-controls">
+                        <span id="scanStatus" class="badge bg-info">就绪</span>
+                        <div class="preset-info" id="scanPresetSummary">SR -- • RBW -- • Span -- • FFT -- • Seg -- • Window --</div>
+                        <button type="button" class="btn btn-primary btn-sm" id="start-scan-btn" data-action="start-scan" data-old-onclick="startSpectrumScan()">开始扫描</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="stop-scan-btn" data-action="stop-scan" data-old-onclick="stopSpectrumScan()">停止扫描</button>
+                    </div>
+                </div>
+                <form id="spectrumScanForm" class="spectrum-scan-form" onsubmit="event.preventDefault(); startSpectrumScan();">
+                    <div class="scan-parameters-grid">
+                        <div class="scan-field scan-field-inline">
+                            <label for="scanStartFreq">起始频率 (MHz)</label>
+                            <input type="number" id="scanStartFreq" name="start_freq" value="88.0" step="0.1" min="1" max="6000" required>
+                        </div>
+                        <div class="scan-field scan-field-inline">
+                            <label for="scanStopFreq">终止频率 (MHz)</label>
+                            <input type="number" id="scanStopFreq" name="stop_freq" value="108.0" step="0.1" min="1" max="6000" required>
+                        </div>
+                        <div class="scan-field scan-field-inline">
+                            <label for="scanWindow">窗函数</label>
+                            <select id="scanWindow" name="window">
+                                <option value="none" selected>None</option>
+                                <option value="hann">Hann</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Signal Analysis 部分 -->
+        <div class="full-width-panel">
+            <div class="panel">
+                <!-- 头部控制区域 -->
+                <div class="panel-header signal-analysis-header">
+                    <h3>📊 Signal Analysis</h3>
+                    <div class="analysis-controls">
+                        <span id="selected-file-info" class="file-info">未选择文件</span>
+                        <span id="stream-frame-counter" class="file-info">帧 --</span>
+                        <button type="button" class="btn btn-primary btn-sm" id="start-stream-btn"><i class="fas fa-play"></i> 开始</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="stop-stream-btn" disabled><i class="fas fa-stop"></i> 停止</button>
+                    </div>
+                </div>
+
+                <!-- Tab 导航 -->
+                <div class="tab-navigation">
+                    <ul class="tab-buttons">
+                        <li class="tab-button active" data-tab="frequency-domain">Frequency Domain</li>
+                        <li class="tab-button push-right" data-tab="time-domain">Time Domain</li>
+                        <li class="tab-button" data-tab="constellation">Constellation</li>
+                        <li class="tab-button" data-tab="higher-order">Higher Order</li>
+                    </ul>
+                </div>
+
+                <!-- Tab 内容区域 -->
+            <div class="tab-content-area">
+                    <!-- developer hint: tab panels have ids like time-domain-panel, frequency-domain-panel, etc. -->
+                    <!-- Frequency Domain -->
+                    <div class="tab-panel active" id="frequency-domain-panel">
+                        <div class="chart-box">
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">等待分析数据...</span>
+                                <canvas id="frequencyDomainChart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Domain -->
+                    <div class="tab-panel" id="time-domain-panel">
+                        <div class="chart-box">
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">等待分析数据...</span>
+                                <canvas id="timeDomainChart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Constellation -->
+                    <div class="tab-panel" id="constellation-panel">
+                        <div class="chart-box constellation-box">
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">等待分析数据...</span>
+                                <canvas id="constellationChart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box eye-diagram-box">
+                            <div class="chart-placeholder">
+                                <span class="placeholder-text">等待分析数据...</span>
+                                <canvas id="eyeDiagramChart" style="display:none"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Higher Order -->
+                    <div class="tab-panel" id="higher-order-panel">
+                        <div class="higher-order-grid">
+                            <div class="higher-order-chart">
+                                <div class="chart-placeholder">
+                                    <span class="placeholder-text">等待分析数据...</span>
+                                    <canvas id="m2Chart" style="display:none"></canvas>
+                                </div>
+                            </div>
+                            <div class="higher-order-chart">
+                                <div class="chart-placeholder">
+                                    <span class="placeholder-text">等待分析数据...</span>
+                                    <canvas id="m4Chart" style="display:none"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Management 板块 -->
+        <div class="full-width-panel">
+            <div class="panel">
+                <div class="panel-header file-management-header">
+                    <h3>📁 File Management</h3>
+                </div>
+                <div class="file-actions">
+                    <input type="file" id="fileInput" accept=".h5,.dat,.complex,.raw,.bin,.wav,.csv,.npy" multiple style="display: none;">
+                    <button data-action="upload-files" data-old-onclick="document.getElementById('fileInput').click()">Upload Files</button>
+                    <button data-action="refresh-list" data-old-onclick="refreshFileListDebug()">Refresh List</button>
+                    <button data-action="clear-plots" data-old-onclick="rptUI.clearAllPlots()">Clear Plots</button>
+                    <button data-action="delete-all" data-old-onclick="rptUI.deleteAllFiles()" class="btn-danger">Delete All</button>
+                </div>
+
+                <div class="file-table-container">
+                    <table id="fileTable" class="file-table">
+                        <thead>
+                            <tr>
+                                <th>选择</th>
+                                <th>文件名</th>
+                                <th>数据类型</th>
+                                <th>文件大小</th>
+                                <th>样点数</th>
+                                <th>采样率</th>
+                                <th>中心频率</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fileTableBody">
+                            <tr>
+                                <td colspan="8" class="loading">Loading files...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能操作板块 -->
+        <div class="full-width-panel">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>🔧 功能操作</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="tab-navigation">
+                        <div class="tab-buttons">
+                            <button class="tab-button active" data-tab="signal-operations">信号操作</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content-area">
+                        <div class="tab-panel active" id="signal-operations-tab">
+                            <div class="operations-grid">
+                                <!-- 录制面板 -->
+                                <div class="operation-panel">
+                                    <h4>📹 Signal Recording</h4>
+                                    <form id="recordForm" class="form compact-form">
+                                        <label>Frequency (MHz)</label>
+                                        <input type="number" name="freq" value="10" step="0.1" min="0" required>
+                                        <label>Sample Rate (Hz)</label>
+                                        <select id="recordSampleRate" name="rate" required></select>
+                                        <label>Gain (dB)</label>
+                                        <input type="number" name="gain" value="30" step="1">
+                                        <label>Duration (s)</label>
+                                        <input type="number" name="duration" value="5" step="0.1" required>
+                                        <label>Channel</label>
+                                        <input type="number" name="channel" value="0" min="0" max="3">
+                                        <label>Filename (optional)</label>
+                                        <input type="text" name="filename" placeholder="auto_generate_if_empty">
+                                        <button id="record-start-btn" type="submit">Start Recording</button>
+                                    </form>
+                                </div>
+
+                                <!-- 播放面板 -->
+                                <div class="operation-panel">
+                                    <h4>▶️ Signal Playback</h4>
+                                    <form id="playForm" class="form compact-form">
+                                        <label>Select File</label>
+                                        <select name="filename" id="playFileSelect" required>
+                                            <option value="">Loading files...</option>
+                                        </select>
+                                        <label>TX Frequency (MHz)</label>
+                                        <input type="number" name="freq" value="100" step="0.1" min="0">
+                                        <label>TX Sample Rate (Hz)</label>
+                                        <select id="playSampleRate" name="rate" required></select>
+                                        <label>TX Gain (dB)</label>
+                                        <input type="number" name="gain" value="25">
+                                        <label>TX Amplitude Scale</label>
+                                        <input type="number" name="scale" value="1.0" step="0.1" min="0">
+                                        <label>Repeat Count</label>
+                                        <input type="number" name="repeat" value="1" min="0">
+                                        <button id="play-start-btn" type="submit">Start Playback</button>
+                                    </form>
+                                </div>
+
+                                <!-- 生成面板 -->
+                                <div class="operation-panel">
+                                    <h4>🎛️ Signal Generation</h4>
+                                    <form id="generateForm" class="form compact-form">
+                                        <label>Center Frequency (MHz)</label>
+                                        <input type="number" name="center_freq" value="100" step="0.1" min="0" required>
+                                        <label>Symbol Rate (Hz)</label>
+                                        <input type="number" name="symbol_rate" value="500000" required>
+                                        <label>Sample Rate (Hz)</label>
+                                        <select id="generateSampleRate" name="sample_rate" required></select>
+                                        <label>Duration (s)</label>
+                                        <input type="number" name="duration" value="1" step="0.1">
+                                        <label>Save File (optional)</label>
+                                        <input type="text" name="save_file" placeholder="qpsk_signal.h5">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="transmit"> Transmit after generation
+                                        </label>
+                                        <button type="submit">Generate QPSK</button>
+                                    </form>
+                                </div>
+
+                                <!-- 转换面板 -->
+                                <div class="operation-panel">
+                                    <h4>🔄 Format Conversion</h4>
+                                    <form id="convertForm" class="form compact-form">
+                                        <label>Select File</label>
+                                        <select name="filename" id="convertFileSelect" required>
+                                            <option value="">Loading files...</option>
+                                        </select>
+                                        <label>Target Format</label>
+                                        <select name="format" required>
+                                            <option value="wav">WAV</option>
+                                            <option value="csv">CSV</option>
+                                            <option value="npy">NPY</option>
+                                            <option value="h5">HDF5</option>
+                                        </select>
+                                        <label>Output Filename (optional)</label>
+                                        <input type="text" name="output" placeholder="auto_generate">
+                                        <button type="submit">Convert</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务监控板块 -->
+        <div class="full-width-panel">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📊 Task Monitor</h3>
+                </div>
+                <div class="task-table-container">
+                    <table id="taskTable" class="task-table">
+                        <thead>
+                            <tr>
+                                <th>任务类型</th>
+                                <th>文件名</th>
+                                <th>数据类型</th>
+                                <th>执行进度</th>
+                                <th>执行时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">Loading tasks...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis results -->
+        <div class="full-width-panel">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📊 Signal Analysis Results</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="analysisResults" class="analysis-metrics">
+                        <div class="analysis-metrics"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toastContainer" class="toast-container"></div>
+
+        <!-- File Preview Panel (hidden by default) -->
+        <div id="previewPanel" class="full-width-panel" style="display: none;">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>📊 File Preview</h3>
+                    <div>
+                        <button class="btn btn-sm btn-secondary" data-action="close-preview" data-old-onclick="rptUI.closePreview()">Close</button>
+                        <button class="btn btn-sm btn-primary" data-action="analyze-preview" data-old-onclick="rptUI.analyzeFromPreview()">Full Analysis</button>
+                    </div>
+                </div>
+                </div>
+                <div class="panel-body">
+                    <div id="previewLoading" class="preview-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading preview data...</p>
+                    </div>
+
+                    <div id="previewContent" class="preview-content" style="display: none;">
+                        <div class="preview-info d-flex gap-4 mb-3">
+                            <div class="preview-info-item"><label>Filename:</label> <span id="previewFilename">-</span></div>
+                            <div class="preview-info-item"><label>Sample Rate:</label> <span id="previewSampleRate">-</span></div>
+                            <div class="preview-info-item"><label>Total Samples:</label> <span id="previewTotalSamples">-</span></div>
+                            <div class="preview-info-item"><label>Preview Samples:</label> <span id="previewSamplesCount">-</span></div>
+                        </div>
+
+                        <div class="preview-tabs mb-2">
+                            <button class="preview-tab active" data-tab="time">Time Domain</button>
+                            <button class="preview-tab" data-tab="magnitude">Magnitude</button>
+                            <button class="preview-tab" data-tab="phase">Phase</button>
+                            <button class="preview-tab" data-tab="iq">I/Q Scatter</button>
+                        </div>
+
+                        <div class="preview-charts d-flex gap-3">
+                            <div class="preview-chart active flex-fill" id="timeChart">
+                                <canvas id="preview_timeDomainChart"></canvas>
+                            </div>
+                            <div class="preview-chart" id="magnitudeChart">
+                                <canvas id="preview_magnitudeChart"></canvas>
+                            </div>
+                            <div class="preview-chart" id="phaseChart">
+                                <canvas id="preview_phaseChart"></canvas>
+                            </div>
+                            <div class="preview-chart" id="iqChart">
+                                <canvas id="preview_iqScatterChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="previewError" class="preview-error" style="display: none;">
+                        <div class="error-icon">❌</div>
+                        <p id="previewErrorMessage">Failed to load preview data</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Expansion toggle disabled per latest requirements
+    </script>
+
+    <script src="/static/init-action-delegates.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
