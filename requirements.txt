@@ -9,3 +9,5 @@ h5py==3.10.0
 # Network / web testing runtime deps used by tests
 requests>=2.31.0
 fastapi>=0.95.0
+# Plotting library required by utils.visualizer and some analyzer helpers
+matplotlib>=3.8.0
