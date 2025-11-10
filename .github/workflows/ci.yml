@@ -42,6 +42,8 @@ jobs:
   python-tests:
     name: Python unit tests
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     needs: frontend
     strategy:
       matrix:
@@ -84,15 +86,15 @@ jobs:
 
       - name: Upload coverage to Codecov
         # Only attempt upload when a Codecov token is provided to avoid failing the job in public forks
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
+        if: ${{ env.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v4
         with:
           files: coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
       - name: Persist coverage.xml when Codecov token is missing
-        if: ${{ secrets.CODECOV_TOKEN == '' }}
+        if: ${{ env.CODECOV_TOKEN == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage-xml
