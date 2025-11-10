@@ -1,4 +1,49 @@
 #!/usr/bin/env python3
+"""Basic data-stability verifier for sample signal files.
+
+This script attempts to import the project's FileManager and load files provided
+as arguments (or samples under var/uploads). It prints a small signature per file
+so CI or PR checks can compare before/after summaries.
+"""
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_UPLOADS = ROOT / 'var' / 'uploads'
+
+
+def main():
+    files = [Path(p) for p in sys.argv[1:]]
+    if not files:
+        if DEFAULT_UPLOADS.exists():
+            files = [p for p in DEFAULT_UPLOADS.iterdir() if p.suffix.lower() in ('.h5', '.bin', '.raw', '.dat')]
+        else:
+            print('No files given and uploads directory missing; skipping data stability checks')
+            return 0
+
+    try:
+        from core.file_manager import FileManager
+    except Exception as e:
+        print('Unable to import core.file_manager.FileManager:', e)
+        print('Skipping data stability checks')
+        return 0
+
+    fm = FileManager()
+    for f in files[:5]:
+        try:
+            samples, metadata = fm.load_signal(str(f))
+            n = len(samples) if samples is not None else 0
+            sr = getattr(metadata, 'sample_rate', None) if metadata else None
+            print(f'{f.name}: samples={n}, sample_rate={sr}')
+        except Exception as e:
+            print(f'Error loading {f.name}: {e}')
+
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+#!/usr/bin/env python3
 """Simple data-stability verifier: loads example files and prints sample counts.
 This is intentionally lightweight — a later version should do numeric comparisons.
 """

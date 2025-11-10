@@ -9,9 +9,10 @@ beforeEach(() => {
   };
   window.open = jest.fn();
 
-  const script = fs.readFileSync(path.resolve(__dirname, '../../webui/static/init-action-delegates.js'), 'utf8');
+  const filePath = path.resolve(__dirname, '../../webui/static/init-action-delegates.js');
+  const scriptContent = fs.readFileSync(filePath, 'utf8');
   const s = document.createElement('script');
-  s.textContent = script;
+  s.textContent = scriptContent;
   document.head.appendChild(s);
 });
 
