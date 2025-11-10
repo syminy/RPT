@@ -1,130 +1,72 @@
 #!/usr/bin/env python3
-"""Scan templates and static files for inline `onclick=` occurrences.
-
-This is a simple preflight check used by PRs to detect remaining inline handlers.
-It strips HTML comments and basic JS comments before searching to reduce false positives.
 """
+Check for inline onclick handlers in templates and static files.
+Ignores data-old-onclick attributes (preserved fallbacks).
+"""
+
+import os
 import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SEARCH_PATHS = [ROOT / 'webui' / 'templates', ROOT / 'webui' / 'static']
-EXTS = ('.html', '.htm', '.js', '.vue')
+def scan_for_inline_onclick(root_dir="."):
+    """Scan for inline onclick handlers, ignoring data-old-onclick."""
+    root_path = Path(root_dir)
+    patterns = [
+        "**/*.html",
+        "**/*.js",
+        "**/*.jsx",
+        "**/*.ts",
+        "**/*.tsx"
+    ]
+    
+    # Ignore node_modules, .git, and other non-source directories
+    ignore_dirs = {
+        "node_modules", ".git", "backups", "__pycache__", 
+        ".venv", "venv", "dist", "build"
+    }
+    
+    inline_onclick_pattern = re.compile(r'(?<!data-old-)onclick\s*=\s*["\'][^"\']*["\']')
+    occurrences = []
+    
+    for pattern in patterns:
+        for file_path in root_path.glob(pattern):
+            # Skip ignored directories
+            if any(ignore in str(file_path) for ignore in ignore_dirs):
+                continue
+                
+            try:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                    lines = content.split('\n')
+                    
+                    for line_num, line in enumerate(lines, 1):
+                        if inline_onclick_pattern.search(line):
+                            occurrences.append({
+                                'file': str(file_path),
+                                'line': line_num,
+                                'content': line.strip()
+                            })
+            except (UnicodeDecodeError, IOError):
+                # Skip binary files or unreadable files
+                continue
+    
+    return occurrences
 
-def strip_html_comments(text: str) -> str:
-    return re.sub(r'<!--.*?-->', '', text, flags=re.S)
-
-def strip_js_comments(text: str) -> str:
-    # remove /* ... */ and //...
-    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
-    text = re.sub(r'//.*$', '', text, flags=re.M)
-    return text
-
-def find_onclick_in_file(p: Path):
-    try:
-        txt = p.read_text(encoding='utf-8', errors='ignore')
-    except Exception:
-        return []
-
-    if p.suffix in ('.html', '.htm', '.vue'):
-        txt = strip_html_comments(txt)
-    if p.suffix == '.js' or p.suffix == '.vue':
-        txt = strip_js_comments(txt)
-
-    hits = []
-    # Match onclick= occurrences but ignore our preserved data-old-onclick attribute
-    pattern = re.compile(r'(?<!data-old-)onclick\s*=')
-    for i, line in enumerate(txt.splitlines(), start=1):
-        if pattern.search(line):
-            hits.append((i, line.strip()))
-    return hits
 
 def main():
-    found = 0
-    for base in SEARCH_PATHS:
-        if not base.exists():
-            continue
-        for p in base.rglob('*'):
-            if p.is_file() and p.suffix.lower() in EXTS:
-                hits = find_onclick_in_file(p)
-                if hits:
-                    found += len(hits)
-                    print(f"{p}:")
-                    for ln, txt in hits:
-                        print(f"  {ln}: {txt}")
+    root_dir = os.getcwd()
+    occurrences = scan_for_inline_onclick(root_dir)
+    
+    if occurrences:
+        print(f"Found {len(occurrences)} inline onclick occurrences:")
+        for occ in occurrences:
+            print(f"  {occ['file']}:{occ['line']} - {occ['content'][:100]}...")
+        print("\nPlease replace with data-action delegation or comment/backup.")
+        sys.exit(1)
+    else:
+        print("No inline onclick occurrences found.")
+        sys.exit(0)
 
-    if found:
-        print(f"Found {found} inline onclick occurrences. Please replace with data-action delegation or comment/backup.")
-        return 2
-    print("No inline onclick occurrences found.")
-    return 0
-
-
-if __name__ == '__main__':
-    sys.exit(main())
-#!/usr/bin/env python3
-"""Scan templates and static files for inline `onclick=` occurrences.
-
-This is a simple preflight check used by PRs to detect remaining inline handlers.
-It strips HTML comments and basic JS comments before searching to reduce false positives.
-"""
-import re
-import sys
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-SEARCH_PATHS = [ROOT / 'webui' / 'templates', ROOT / 'webui' / 'static']
-EXTS = ('.html', '.htm', '.js', '.vue')
-
-def strip_html_comments(text: str) -> str:
-    return re.sub(r'<!--.*?-->', '', text, flags=re.S)
-
-def strip_js_comments(text: str) -> str:
-    # remove /* ... */ and //...
-    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
-    text = re.sub(r'//.*$', '', text, flags=re.M)
-    return text
-
-def find_onclick_in_file(p: Path):
-    try:
-        txt = p.read_text(encoding='utf-8', errors='ignore')
-    except Exception:
-        return []
-
-    if p.suffix in ('.html', '.htm', '.vue'):
-        txt = strip_html_comments(txt)
-    if p.suffix == '.js' or p.suffix == '.vue':
-        txt = strip_js_comments(txt)
-
-    hits = []
-    # Match onclick= occurrences but ignore our preserved data-old-onclick attribute
-    pattern = re.compile(r'(?<!data-old-)onclick\s*=')
-    for i, line in enumerate(txt.splitlines(), start=1):
-        if pattern.search(line):
-            hits.append((i, line.strip()))
-    return hits
-
-def main():
-    found = 0
-    for base in SEARCH_PATHS:
-        if not base.exists():
-            continue
-        for p in base.rglob('*'):
-            if p.is_file() and p.suffix.lower() in EXTS:
-                hits = find_onclick_in_file(p)
-                if hits:
-                    found += len(hits)
-                    print(f"{p}:")
-                    for ln, txt in hits:
-                        print(f"  {ln}: {txt}")
-
-    if found:
-        print(f"Found {found} inline onclick occurrences. Please replace with data-action delegation or comment/backup.")
-        return 2
-    print("No inline onclick occurrences found.")
-    return 0
-
-
-if __name__ == '__main__':
-    sys.exit(main())
+if __name__ == "__main__":
+    main()
