@@ -82,7 +82,8 @@ jobs:
             python -m pip install -r requirements.txt
           else
             echo "requirements.txt not found — installing a minimal fallback set needed for tests"
-            python -m pip install numpy>=1.23,<2 scipy>=1.8,<2 matplotlib>=3.5,<4 h5py>=3.6,<4
+            # Quote package specs so shell doesn't treat '<' as redirection
+            python -m pip install 'numpy>=1.23,<2' 'scipy>=1.8,<2' 'matplotlib>=3.5,<4' 'h5py>=3.6,<4'
           fi
           # Ensure test runner and coverage are available on PATH; call via `python -m pytest` below
           python -m pip install pytest pytest-cov
