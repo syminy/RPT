@@ -154,11 +154,19 @@ class StreamingSignalAnalyzer:
         try:
             # debug: write basic session/thread info to a local file
             try:
-                with open('/tmp/stream_worker_debug.log', 'a') as fh:
-                    fh.write(f"Worker start session={getattr(session,'session_id',None)} thread={threading.current_thread().name}\n")
-                    fh.write(f"loop={getattr(session,'loop',None)}\n")
+                # structured logging instead of ad-hoc /tmp file writes
+                self.logger.debug(
+                    "Worker start: session=%s thread=%s loop=%s",
+                    getattr(session, 'session_id', None),
+                    threading.current_thread().name,
+                    getattr(session, 'loop', None),
+                )
             except Exception:
-                pass
+                # best-effort; don't fail the worker startup
+                try:
+                    self.logger.debug("Worker start: session=%s (failed to log loop info)", getattr(session, 'session_id', None))
+                except Exception:
+                    pass
             file_manager = FileManager()
             signal_processor = SignalProcessor()
 
@@ -224,21 +232,24 @@ class StreamingSignalAnalyzer:
         except Exception as e:
             # capture traceback and write to a local debug file (helps when logging config is limited)
             tb = traceback.format_exc()
+            # log error with traceback via structured logging
             try:
-                with open('/tmp/stream_worker_errors.log', 'a') as fh:
-                    fh.write(f"Session {getattr(session,'session_id',None)} error:\n{tb}\n\n")
+                self.logger.error("Session %s worker error: %s", getattr(session, 'session_id', None), str(e))
+                self.logger.debug(tb)
             except Exception:
-                pass
-
-            # also log via logger
-            self.logger.exception(f"Error in processing worker for session {getattr(session,'session_id',None)}")
+                # fallback to exception logger
+                try:
+                    self.logger.exception("Error in processing worker for session %s", getattr(session, 'session_id', None))
+                except Exception:
+                    pass
 
             error_msg = {"type": "error", "error": str(e), "traceback": tb}
             try:
-                if session and session.loop and session.loop.is_running():
-                    session.loop.call_soon_threadsafe(lambda: asyncio.create_task(session.message_queue.put(error_msg)))
+                # use SafeMessageQueue bridge so this works even if the captured loop is closed
+                if session and getattr(session, 'message_queue', None) is not None:
+                    session.message_queue.put_from_thread(error_msg)
             except Exception:
-                pass
+                self.logger.exception("Failed to enqueue error_msg for session %s during exception handling", getattr(session, 'session_id', None))
 
     def _process_signal_chunk(self, chunk_data, signal_processor, session):
         # time domain

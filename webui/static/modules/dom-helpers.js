@@ -30,6 +30,47 @@
     return () => root.removeEventListener(eventType, listener);
   }
 
+  // Convenience: central data-action delegation router
+  // Looks for data-action attribute on clicked element or ancestors and calls
+  // registered handlers on window.rptActions or via require('./action-router') when available.
+  function delegateDataActions(root=document){
+    const listener = function(e){
+      let node = e.target;
+      while(node && node !== root){
+        const action = node.dataset && node.dataset.action;
+        if (action) {
+          // try runtime registry
+          try {
+            // prefer module if available
+            let router = null;
+            if (typeof require === 'function') {
+              try { router = require('./action-router'); } catch(_) { router = null; }
+            }
+            if (router && router.handleAction) {
+              router.handleAction(action, e, node);
+            } else if (window && window.rptActions) {
+              // prefer explicit API on rptActions
+              if (typeof window.rptActions.handleAction === 'function') {
+                window.rptActions.handleAction(action, e, node);
+              } else if (typeof window.rptActions[action] === 'function') {
+                // older usage: handlers attached directly by name
+                window.rptActions[action](e, node);
+              }
+            }
+          } catch(err) {
+            // swallow to avoid breaking UI
+            // eslint-disable-next-line no-console
+            console.error('delegateDataActions handler error', err);
+          }
+          return;
+        }
+        node = node.parentElement;
+      }
+    };
+    root.addEventListener('click', listener);
+    return () => root.removeEventListener('click', listener);
+  }
+
   // dataAttr get/set
   function dataAttr(el, name, value){
     if (arguments.length === 3) { el.dataset[name] = value; return; }
@@ -59,6 +100,7 @@
   exports.dataAttr = dataAttr;
   exports.bindNamespace = bindNamespace;
   exports.unbindNamespace = unbindNamespace;
+  exports.delegateDataActions = delegateDataActions;
 
   if (typeof window !== 'undefined'){
     window.rptDom = window.rptDom || {};

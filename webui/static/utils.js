@@ -2,13 +2,78 @@
 // Small, dependency-free helpers extracted from app.js
 // Exposes a single global: window.rptUtils
 // shim to preserve compatibility: re-export from modules/utils.js
-try {
-  const mod = require('./modules/utils.js');
-  if (typeof window !== 'undefined') window.rptUtils = Object.assign(window.rptUtils || {}, mod);
-  if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-} catch (e) {
-  // fallback: keep the legacy implementation if the modules file isn't available
-  /* legacy implementation preserved earlier; this fallback will not run in normal dev */
-  // eslint-disable-next-line no-console
-  console.warn('Could not load modules/utils.js, utils shim falling back (legacy not present)');
-}
+
+// Minimal utils shim used by tests and legacy pages
+// Provides a small set of formatting helpers as module.exports and window.rptUtils
+(function(){
+  const n310SampleRatesHz = [125000,250000,500000,748503,1e6,1.25e6,1.50602e6,2.01613e6,2.5e6,3.125e6,4.03226e6,5e6,7.8125e6,1.04167e7,2.08333e7,2.5e7,3.125e7];
+
+  function formatSampleRateOptionText(rateHz) {
+    const rateKHz = rateHz / 1e3;
+    if (rateKHz >= 1000) {
+      const decimals = Number.isInteger(rateKHz) ? 0 : 1;
+      return `${rateKHz.toFixed(decimals).replace(/\.0$/, '')} kHz`;
+    }
+    return `${rateKHz.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} kHz`;
+  }
+
+  function safeNumber(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
+  }
+
+  function formatSampleRate(valueHz) {
+    const num = safeNumber(valueHz);
+    if (!num && num !== 0) return null;
+    if (Math.abs(num) >= 1e6) return `${(num / 1e6).toFixed(2).replace(/\.00$/, '')} MSps`;
+    if (Math.abs(num) >= 1e3) return `${(num / 1e3).toFixed(1).replace(/\.0$/, '')} kSps`;
+    return `${num.toFixed(0)} Sps`;
+  }
+
+  function formatResolution(valueHz) {
+    const num = safeNumber(valueHz);
+    if (!num && num !== 0) return null;
+    if (Math.abs(num) >= 1e6) return `${(num / 1e6).toFixed(2).replace(/\.00$/, '')} MHz`;
+    if (Math.abs(num) >= 1e3) return `${(num / 1e3).toFixed(0)} kHz`;
+    return `${num.toFixed(0)} Hz`;
+  }
+
+  function formatFps(value) {
+    const num = safeNumber(value);
+    if (!num && num !== 0) return null;
+    return `${num.toFixed(num >= 10 ? 0 : 1).replace(/\.0$/, '')} fps`;
+  }
+
+  function formatDwell(valueSeconds) {
+    const num = safeNumber(valueSeconds);
+    if (!num && num !== 0) return null;
+    return `${(num * 1000).toFixed(1).replace(/\.0$/, '')} ms`;
+  }
+
+  function normalizePresetKey(value) {
+    return (value || '').toString().trim().toUpperCase();
+  }
+
+  function formatPresetDescriptor(settings = {}, presets = {}) {
+    const parts = [];
+    const fps = formatFps(settings.target_fps);
+    if (fps) parts.push(fps);
+    const sample = formatSampleRate(settings.sample_rate);
+    if (sample) parts.push(`Sample ${sample}`);
+    const rbw = formatResolution(settings.rbw);
+    if (rbw) parts.push(`RBW ${rbw}`);
+    const fft = safeNumber(settings.fft_size);
+    if (fft) parts.push(`FFT ${Math.round(fft)}`);
+    const dwell = formatDwell(settings.dwell_time);
+    if (dwell) parts.push(`Dwell ${dwell}`);
+    const segments = safeNumber(settings.max_segments);
+    if (segments) parts.push(`≤${Math.round(segments)} segments`);
+    return parts.join(' • ');
+  }
+
+  const api = { n310SampleRatesHz, formatSampleRateOptionText, safeNumber, formatSampleRate, formatResolution, formatFps, formatDwell, normalizePresetKey, formatPresetDescriptor };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  if (typeof window !== 'undefined') window.rptUtils = Object.assign(window.rptUtils || {}, api);
+})();
