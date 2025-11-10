@@ -48,6 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      # Make repository root importable so tests can `import core` and other top-level packages
+      PYTHONPATH: .
     needs: frontend
     strategy:
       matrix:
