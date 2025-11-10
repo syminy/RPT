@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  # Allow manual triggering from the UI or `gh workflow run`
+  workflow_dispatch: {}
+
+jobs:
+  frontend:
+    name: Frontend — lint + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Set up Python for smoke checks
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run preflight checks (templates & data stability)
+        # Ensure Python imports from the repo are available for the verifier
+        run: |
+          # Run the strict "no data-old-*" checker restored in Phase 0.
+          # The script exits non-zero if any data-old-* attributes are found,
+          # which will fail the job and block merges that re-introduce fallbacks.
+          PYTHONPATH=. python3 scripts/check-no-data-old.py
+
+      - name: Lint (ESLint)
+        run: npm run lint --silent
+
+      - name: Frontend tests (Jest)
+        run: npm test --silent
+
+  python-tests:
+    name: Python unit tests
+    runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    needs: frontend
+    strategy:
+      matrix:
+        python-version: [3.11]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install dependencies from requirements.txt. Fail early if the file is missing so CI signals config issues.
+          python -m pip install -r requirements.txt
+          # Ensure test runner and coverage are available
+          python -m pip install pytest pytest-cov
+
+      - name: Start test server (uvicorn)
+        env:
+          PYTHONPATH: .
+        run: |
+          echo "Installing uvicorn if missing and starting server in background"
+          # Install uvicorn into the same Python runtime
+          python -m pip install --upgrade pip
+          python -m pip install uvicorn
+
+          # Start uvicorn in background, write logs to uvicorn.log
+          nohup python -m uvicorn webui.app:app --host 127.0.0.1 --port 8000 --log-level warning &> uvicorn.log &
+
+          # Wait for the server to become reachable (up to ~30s)
+          echo "Waiting for test server to respond on http://127.0.0.1:8000/api/status"
+          for i in $(seq 1 30); do
+            if curl -sS http://127.0.0.1:8000/api/status >/dev/null 2>&1; then
+              echo "Test server ready"
+              break
+            fi
+            sleep 1
+          done
+
+          # If server not ready, dump logs and fail the step so CI stops (pytest would fail anyway)
+          if ! curl -sS http://127.0.0.1:8000/api/status >/dev/null 2>&1; then
+            echo "Test server failed to start; tail of uvicorn.log:" && sed -n '1,400p' uvicorn.log || true
+            exit 1
+          fi
+
+      - name: Run pytest (skip integration/hardware tests)
+        run: |
+          # Use python -m pytest to avoid relying on the pytest console_script being on PATH
+          python -m pytest -q --maxfail=1 --disable-warnings --cov=./ --cov-report=xml:coverage.xml tests -k "not integration and not webui and not spectrum and not realtime"
+
+      - name: Upload pytest artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-artifacts
+          path: .pytest_cache
+
+      - name: Upload coverage to Codecov
+        # Only attempt upload when a Codecov token is provided to avoid failing the job in public forks
+        if: ${{ env.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          token: ${{ env.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+
+      - name: Persist coverage.xml when Codecov token is missing
+        if: ${{ env.CODECOV_TOKEN == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
