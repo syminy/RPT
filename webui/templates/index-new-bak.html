@@ -1,43 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPT - HF Signal Replay System</title>
-    <style>
-        /* 全局样式 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-        }
-        
-        /* 主容器布局 */
-        .main-container {
-            display: flex;
-            gap: 20px;
-            max-width: 100%;
-            margin: 0 auto;
-        }
-        
-        /* 左侧面板 (1/5宽度) */
-        .left-panel {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        /* 中间面板 (3/5宽度) */
-        .center-panel {
-            flex: 3;
-            min-width: 0;
+<!-- index-new-bak.html removed during cleanup of inline onclick backups -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>removed backup</title></head><body>
+<!-- This file was a backup template containing inline onclick handlers and was removed/neutralized by the cleanup in branch fix/clean-data-old-removal. If you need the original content, see backups/frontend/ or the git history. -->
+</body></html>
         }
         
         /* 右侧面板 (1/5宽度) */
@@ -395,9 +360,8 @@
                         </div>
                     </div>
                     <div class="spectrum-scan-buttons">
-                                <button type="button" class="btn btn-primary" id="start-scan-btn" data-action="start-spectrum-scan" data-old-onclick="startSpectrumScan()">Start Scan</button>
-                                    <button type="button" class="btn btn-primary" id="start-scan-btn" data-action="start-scan" data-old-onclick="startSpectrumScan()">Start Scan</button>
-                                    <button type="button" class="btn" id="stop-scan-btn" data-action="stop-scan" data-old-onclick="stopSpectrumScan()">Stop Scan</button>
+                        <button type="button" class="btn btn-primary" id="start-scan-btn" data-action="start-scan">Start Scan</button>
+                        <button type="button" class="btn" id="stop-scan-btn" data-action="stop-scan">Stop Scan</button>
                     </div>
                 </form>
             </div>
@@ -662,14 +626,14 @@
                 <div class="panel-header">
                     <h3>📁 File Management</h3>
                 </div>
-                <div class="file-actions">
-                    <input type="file" id="fileInput" accept=".h5,.dat,.complex,.raw,.bin,.wav,.csv,.npy" multiple style="display: none;">
-                    <button data-action="upload-files" data-old-onclick="document.getElementById('fileInput').click()"  class="btn btn-primary">Upload Files</button>
-                       <button data-action="upload-files" data-old-onclick="document.getElementById('fileInput').click()" class="btn btn-primary">Upload Files</button>
-                       <button data-action="refresh-list" data-old-onclick="refreshFileListDebug()" class="btn">Refresh List</button>
-                       <button data-action="clear-plots" data-old-onclick="rptUI.clearAllPlots()" class="btn">Clear Plots</button>
-                       <button data-action="delete-all" data-old-onclick="rptUI.deleteAllFiles()" class="btn">Delete All</button>
-                </div>
+                          <div class="file-actions">
+                          <input type="file" id="fileInput" accept=".h5,.dat,.complex,.raw,.bin,.wav,.csv,.npy" multiple style="display: none;">
+                          <button data-action="upload-files" class="btn btn-primary">Upload Files</button>
+                              <button data-action="upload-files" class="btn btn-primary">Upload Files</button>
+                              <button data-action="refresh-list" class="btn">Refresh List</button>
+                              <button data-action="clear-plots" class="btn">Clear Plots</button>
+                              <button data-action="delete-all" class="btn">Delete All</button>
+                     </div>
 
                 <div class="file-table-container">
                     <table id="fileTable" class="file-table">
@@ -783,10 +747,10 @@
             <div id="previewPanel" class="panel" style="display: none;">
                 <div class="panel-header">
                     <h3>📊 File Preview</h3>
-                    <div>
-                           <button class="btn btn-sm" data-action="close-preview" data-old-onclick="rptUI.closePreview()">Close</button>
-                           <button class="btn btn-sm btn-primary" data-action="analyze-preview" data-old-onclick="rptUI.analyzeFromPreview()">Full Analysis</button>
-                    </div>
+              <div>
+                  <button class="btn btn-sm" data-action="close-preview">Close</button>
+                  <button class="btn btn-sm btn-primary" data-action="analyze-preview">Full Analysis</button>
+              </div>
                 </div>
                 <div class="compact-form">
                     <div id="previewLoading" class="preview-loading">
@@ -970,8 +934,6 @@
     // Expansion toggle disabled per latest requirements
     </script>
 
-    <script src="/static/init-action-delegates.js"></script>
-    <script src="/static/utils.js"></script>
     <script src="/static/app.js"></script>
 </body>
 </html>

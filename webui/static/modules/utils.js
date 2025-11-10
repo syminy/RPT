@@ -22,8 +22,6 @@
   function formatSampleRateOptionText(rateHz) {
     const rateKHz = rateHz / 1e3;
     if (rateKHz >= 1000) {
-    // Extracted utils module (same helpers as legacy webui/static/utils.js)
-    (function (global) {
       const decimals = Number.isInteger(rateKHz) ? 0 : 1;
       return `${rateKHz.toFixed(decimals).replace(/\.0$/, '')} kHz`;
     }
