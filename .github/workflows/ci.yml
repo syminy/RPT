@@ -66,50 +66,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Show repo and requirements (diagnostic)
-        run: |
-          echo "PWD: $(pwd)"
-          echo "Listing top-level files:" && ls -la
-          echo "--- requirements.txt contents ---"
-          if [ -f requirements.txt ]; then sed -n '1,200p' requirements.txt; else echo 'requirements.txt: MISSING'; fi
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Use `python -m pip` to ensure we install into the Python runtime provided by setup-python
-          if [ -f requirements.txt ]; then
-            echo "Installing full requirements.txt"
-            python -m pip install -r requirements.txt
-          else
-            echo "requirements.txt not found — installing a minimal fallback set needed for tests"
-            # Quote package specs so shell doesn't treat '<' as redirection
-            python -m pip install 'numpy>=1.23,<2' 'scipy>=1.8,<2' 'matplotlib>=3.5,<4' 'h5py>=3.6,<4'
-          fi
-          # Ensure test runner and coverage are available on PATH; call via `python -m pytest` below
+          # Install dependencies from requirements.txt. Fail early if the file is missing so CI signals config issues.
+          python -m pip install -r requirements.txt
+          # Ensure test runner and coverage are available
           python -m pip install pytest pytest-cov
 
       - name: Start test server (uvicorn)
         env:
           PYTHONPATH: .
         run: |
-          echo "Installing uvicorn if missing and verifying import of webui.app before starting server"
+          echo "Installing uvicorn if missing and starting server in background"
           # Install uvicorn into the same Python runtime
           python -m pip install --upgrade pip
           python -m pip install uvicorn
 
-          # Run a direct import check to capture full traceback if imports fail
-          echo "Checking import of webui.app (will print full traceback on failure)"
-          python - <<'PY'
-import importlib, traceback, sys
-try:
-    importlib.import_module('webui.app')
-    print('Import check: OK')
-except Exception:
-    traceback.print_exc()
-    sys.exit(2)
-PY
-
-          # Start uvicorn in background, write logs to uvicorn.log. Ensure PYTHONPATH is set so package imports resolve.
+          # Start uvicorn in background, write logs to uvicorn.log
           nohup python -m uvicorn webui.app:app --host 127.0.0.1 --port 8000 --log-level warning &> uvicorn.log &
 
           # Wait for the server to become reachable (up to ~30s)
