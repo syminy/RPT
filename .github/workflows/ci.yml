@@ -69,7 +69,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # Use `python -m pip` to ensure we install into the Python runtime provided by setup-python
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           # Ensure test runner and coverage are available on PATH; call via `python -m pytest` below
           python -m pip install pytest pytest-cov
 
