@@ -1,34 +1,47 @@
 // Extracted action handlers (registers handlers on a router or exposes handlers for tests)
 (function(exports){
-  function _callRptUI(methodName, ...args){
-    if (typeof window !== 'undefined' && window.rptUI && typeof window.rptUI[methodName] === 'function') return window.rptUI[methodName](...args);
-    if (typeof window !== 'undefined' && typeof window[methodName] === 'function') return window[methodName](...args);
+  // Handlers accept an optional context as third parameter for dependency injection
+  function _getCtx(ctx){
+    // ctx can override rptUI, globals, confirm, document
+    const g = (typeof window !== 'undefined') ? window : (typeof global !== 'undefined' ? global : {});
+    return Object.assign({
+      rptUI: g.rptUI,
+      globals: g,
+      confirm: (typeof g.confirm === 'function') ? g.confirm : undefined,
+      document: (typeof g.document === 'object') ? g.document : undefined
+    }, ctx || {});
   }
 
-  function startStreamHandler(ev, el){ return _callRptUI('startStreaming', ev); }
-  function stopStreamHandler(ev, el){ return _callRptUI('stopStreaming', ev); }
-  function uploadFilesHandler(ev, el){ const fi = document.getElementById('fileInput'); if (fi) fi.click(); }
-  function refreshListHandler(ev, el){ return (typeof window !== 'undefined' && typeof window.refreshFileListDebug === 'function') ? window.refreshFileListDebug(ev) : _callRptUI('loadFileList', ev); }
-  function clearPlotsHandler(ev, el){ return _callRptUI('clearAllPlots', ev); }
-  function deleteAllHandler(ev, el){ if (typeof confirm === 'function' && !confirm('确定要删除所有文件吗？')) return; return _callRptUI('deleteAllFiles', ev); }
-  function closePreviewHandler(ev, el){ return _callRptUI('closePreview', ev); }
-  function analyzePreviewHandler(ev, el){ return _callRptUI('analyzeFromPreview', ev); }
+  function _callRptUI(ctx, methodName, ...args){
+    const c = _getCtx(ctx);
+    if (c.rptUI && typeof c.rptUI[methodName] === 'function') return c.rptUI[methodName](...args);
+    if (c.globals && typeof c.globals[methodName] === 'function') return c.globals[methodName](...args);
+  }
+
+  function startStreamHandler(ev, el, ctx){ return _callRptUI(ctx, 'startStreaming', ev); }
+  function stopStreamHandler(ev, el, ctx){ return _callRptUI(ctx, 'stopStreaming', ev); }
+  function uploadFilesHandler(ev, el, ctx){ const doc = _getCtx(ctx).document; const fi = doc && doc.getElementById && doc.getElementById('fileInput'); if (fi && typeof fi.click === 'function') fi.click(); }
+  function refreshListHandler(ev, el, ctx){ const c = _getCtx(ctx); return (c.globals && typeof c.globals.refreshFileListDebug === 'function') ? c.globals.refreshFileListDebug(ev) : _callRptUI(ctx, 'loadFileList', ev); }
+  function clearPlotsHandler(ev, el, ctx){ return _callRptUI(ctx, 'clearAllPlots', ev); }
+  function deleteAllHandler(ev, el, ctx){ const c = _getCtx(ctx); if (typeof c.confirm === 'function' && !c.confirm('确定要删除所有文件吗？')) return; return _callRptUI(ctx, 'deleteAllFiles', ev); }
+  function closePreviewHandler(ev, el, ctx){ return _callRptUI(ctx, 'closePreview', ev); }
+  function analyzePreviewHandler(ev, el, ctx){ return _callRptUI(ctx, 'analyzeFromPreview', ev); }
 
   function _getFileNameFromEl(el){ return (el && el.dataset && (el.dataset.argFile || el.dataset.file || el.dataset.filename)) || null; }
-  function selectAndAnalyzeHandler(ev, el){ const fname = _getFileNameFromEl(el); if (!fname) return; return _callRptUI('selectAndAnalyzeFile', fname); }
-  function selectFileHandler(ev, el){ const fname = (el && el.dataset && (el.dataset.file || el.dataset.filename)) || null; if (!fname) return; return _callRptUI('selectFile', fname); }
-  function downloadFileHandler(ev, el){ const fname = (el && el.dataset && (el.dataset.file || el.dataset.filename)) || null; if (!fname) return; return _callRptUI('downloadFile', fname); }
-  function showFileInfoHandler(ev, el){ const fname = (el && el.dataset && (el.dataset.file || el.dataset.filename)) || null; if (!fname) return; return _callRptUI('showFileInfo', fname); }
-  function deleteFileHandler(ev, el){ const fname = (el && el.dataset && (el.dataset.file || el.dataset.filename)) || null; if (!fname) return; if (typeof confirm === 'function' && !confirm('确定要删除 ' + fname + ' 吗？')) return; return _callRptUI('deleteFile', fname); }
+  function selectAndAnalyzeHandler(ev, el, ctx){ const fname = _getFileNameFromEl(el); if (!fname) return; return _callRptUI(ctx, 'selectAndAnalyzeFile', fname); }
+  function selectFileHandler(ev, el, ctx){ const fname = (el && el.dataset && (el.dataset.file || el.dataset.filename)) || null; if (!fname) return; return _callRptUI(ctx, 'selectFile', fname); }
+  function downloadFileHandler(ev, el, ctx){ const fname = (el && el.dataset && (el.dataset.file || el.dataset.filename)) || null; if (!fname) return; return _callRptUI(ctx, 'downloadFile', fname); }
+  function showFileInfoHandler(ev, el, ctx){ const fname = (el && el.dataset && (el.dataset.file || el.dataset.filename)) || null; if (!fname) return; return _callRptUI(ctx, 'showFileInfo', fname); }
+  function deleteFileHandler(ev, el, ctx){ const fname = (el && el.dataset && (el.dataset.file || el.dataset.filename)) || null; if (!fname) return; const c = _getCtx(ctx); if (typeof c.confirm === 'function' && !c.confirm('确定要删除 ' + fname + ' 吗？')) return; return _callRptUI(ctx, 'deleteFile', fname); }
 
-  function cancelTaskHandler(ev, el){ const taskId = el && el.dataset && el.dataset.taskid; if (!taskId) return; return _callRptUI('cancelTask', taskId); }
-  function viewTaskResultHandler(ev, el){ const taskId = el && el.dataset && el.dataset.taskid; if (!taskId) return; return _callRptUI('viewTaskResult', taskId); }
+  function cancelTaskHandler(ev, el, ctx){ const taskId = el && el.dataset && el.dataset.taskid; if (!taskId) return; return _callRptUI(ctx, 'cancelTask', taskId); }
+  function viewTaskResultHandler(ev, el, ctx){ const taskId = el && el.dataset && el.dataset.taskid; if (!taskId) return; return _callRptUI(ctx, 'viewTaskResult', taskId); }
 
-  function saveConfigHandler(ev, el){ return (typeof window !== 'undefined' && window.configPage && typeof window.configPage.saveCurrentSection === 'function') ? window.configPage.saveCurrentSection(ev) : (typeof window.saveCurrentSection === 'function' ? window.saveCurrentSection(ev) : undefined); }
-  function saveAllConfigHandler(ev, el){ return (typeof window !== 'undefined' && window.configPage && typeof window.configPage.saveAllConfig === 'function') ? window.configPage.saveAllConfig(ev) : (typeof window.saveAllConfig === 'function' ? window.saveAllConfig(ev) : undefined); }
-  function resetConfigHandler(ev, el){ return (typeof window !== 'undefined' && window.configPage && typeof window.configPage.resetCurrentSection === 'function') ? window.configPage.resetCurrentSection(ev) : (typeof window.resetCurrentSection === 'function' ? window.resetCurrentSection(ev) : undefined); }
-  function resetAllConfigHandler(ev, el){ return (typeof window !== 'undefined' && window.configPage && typeof window.configPage.resetAllConfig === 'function') ? window.configPage.resetAllConfig(ev) : (typeof window.resetAllConfig === 'function' ? window.resetAllConfig(ev) : undefined); }
-  function createBackupHandler(ev, el){ return (typeof window !== 'undefined' && window.configPage && typeof window.configPage.createBackup === 'function') ? window.configPage.createBackup(ev) : (typeof window.createBackup === 'function' ? window.createBackup(ev) : undefined); }
+  function saveConfigHandler(ev, el, ctx){ const c = _getCtx(ctx); return (c.globals && c.globals.configPage && typeof c.globals.configPage.saveCurrentSection === 'function') ? c.globals.configPage.saveCurrentSection(ev) : (typeof c.globals.saveCurrentSection === 'function' ? c.globals.saveCurrentSection(ev) : undefined); }
+  function saveAllConfigHandler(ev, el, ctx){ const c = _getCtx(ctx); return (c.globals && c.globals.configPage && typeof c.globals.configPage.saveAllConfig === 'function') ? c.globals.configPage.saveAllConfig(ev) : (typeof c.globals.saveAllConfig === 'function' ? c.globals.saveAllConfig(ev) : undefined); }
+  function resetConfigHandler(ev, el, ctx){ const c = _getCtx(ctx); return (c.globals && c.globals.configPage && typeof c.globals.configPage.resetCurrentSection === 'function') ? c.globals.configPage.resetCurrentSection(ev) : (typeof c.globals.resetCurrentSection === 'function' ? c.globals.resetCurrentSection(ev) : undefined); }
+  function resetAllConfigHandler(ev, el, ctx){ const c = _getCtx(ctx); return (c.globals && c.globals.configPage && typeof c.globals.configPage.resetAllConfig === 'function') ? c.globals.configPage.resetAllConfig(ev) : (typeof c.globals.resetAllConfig === 'function' ? c.globals.resetAllConfig(ev) : undefined); }
+  function createBackupHandler(ev, el, ctx){ const c = _getCtx(ctx); return (c.globals && c.globals.configPage && typeof c.globals.configPage.createBackup === 'function') ? c.globals.configPage.createBackup(ev) : (typeof c.globals.createBackup === 'function' ? c.globals.createBackup(ev) : undefined); }
 
   function register(router){
     try {
