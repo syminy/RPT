@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, 'refactor/**' ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, 'refactor/**' ]
   # Allow manual triggering from the UI or `gh workflow run`
   workflow_dispatch: {}
 
@@ -48,6 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      # Make repository root importable so tests can `import core` and other top-level packages
+      PYTHONPATH: .
     needs: frontend
     strategy:
       matrix:
@@ -109,6 +111,19 @@ jobs:
         run: |
           # Use python -m pytest to avoid relying on the pytest console_script being on PATH
           python -m pytest -q --maxfail=1 --disable-warnings --cov=./ --cov-report=xml:coverage.xml tests -k "not integration and not webui and not spectrum and not realtime"
+
+      - name: Debug - Capture pytest failure details
+        if: ${{ failure() }}
+        env:
+          PYTHONPATH: .
+        run: |
+          echo "=== Python Environment ==="
+          python -c "import sys; print('Python path:', sys.path)"
+          echo "=== Installed Packages ==="
+          python -m pip list
+          echo "=== Pytest Full Output ==="
+          # Run a verbose pytest pass to capture full traceback; don't fail this debug step
+          PYTHONPATH=. python -m pytest tests/ -v --tb=long || true
 
       - name: Upload pytest artifacts
         if: always()

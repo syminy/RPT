@@ -1,5 +1,24 @@
-// Extracted utils module (same helpers as legacy webui/static/utils.js)
-(function (global) {
+// Wrapper for legacy `utils.js` that re-uses the extracted core module when
+// running in a CommonJS environment (Node/Jest). In browser environments
+// both files may be loaded; both assign to `window.rptUtils` for compatibility.
+(function (_global) {
+  if (typeof module !== 'undefined' && module.exports) {
+    // Use the extracted core module in Node/commonjs environments
+    const core = require('./utils.core.js');
+    module.exports = core;
+    if (typeof window !== 'undefined') window.rptUtils = Object.assign(window.rptUtils || {}, core);
+    return;
+  }
+
+  // Fallback: if not running under CommonJS (browser), include a small shim
+  // that preserves the original behavior by deferring to window.rptUtils when
+  // present. This keeps backward compatibility with pages that include the
+  // legacy bundle ordering.
+  if (typeof window !== 'undefined' && window.rptUtils) return;
+
+  // If window.rptUtils isn't present, load the core definitions by inlining
+  // a minimal copy. This path is seldom used in modern builds but kept for
+  // maximum compatibility.
   const n310SampleRatesHz = [
     250000,
     500000,
@@ -66,7 +85,7 @@
     return (value || '').toString().trim().toUpperCase();
   }
 
-  function formatPresetDescriptor(settings = {}, presets = {}) {
+  function formatPresetDescriptor(settings = {}, _presets = {}) {
     const parts = [];
     const fps = formatFps(settings.target_fps);
     if (fps) parts.push(fps);
@@ -95,7 +114,6 @@
     formatPresetDescriptor,
   };
 
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') {
     window.rptUtils = Object.assign(window.rptUtils || {}, api);
   }

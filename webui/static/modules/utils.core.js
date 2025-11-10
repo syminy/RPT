@@ -1,12 +1,23 @@
-// webui/static/utils.js
-// Small, dependency-free helpers extracted from app.js
-// Exposes a single global: window.rptUtils
-// shim to preserve compatibility: re-export from modules/utils.js
-
-// Minimal utils shim used by tests and legacy pages
-// Provides a small set of formatting helpers as module.exports and window.rptUtils
-(function(){
-  const n310SampleRatesHz = [125000,250000,500000,748503,1e6,1.25e6,1.50602e6,2.01613e6,2.5e6,3.125e6,4.03226e6,5e6,7.8125e6,1.04167e7,2.08333e7,2.5e7,3.125e7];
+// Core utilities extracted for module-based refactor
+(function (_global) {
+  const n310SampleRatesHz = [
+    250000,
+    500000,
+    748503,
+    1e6,
+    1.25e6,
+    1.50602e6,
+    2.01613e6,
+    2.5e6,
+    3.125e6,
+    4.03226e6,
+    5e6,
+    7.8125e6,
+    1.04167e7,
+    2.08333e7,
+    2.5e7,
+    3.125e7,
+  ];
 
   function formatSampleRateOptionText(rateHz) {
     const rateKHz = rateHz / 1e3;
@@ -72,8 +83,20 @@
     return parts.join(' • ');
   }
 
-  const api = { n310SampleRatesHz, formatSampleRateOptionText, safeNumber, formatSampleRate, formatResolution, formatFps, formatDwell, normalizePresetKey, formatPresetDescriptor };
+  const api = {
+    n310SampleRatesHz,
+    formatSampleRateOptionText,
+    safeNumber,
+    formatSampleRate,
+    formatResolution,
+    formatFps,
+    formatDwell,
+    normalizePresetKey,
+    formatPresetDescriptor,
+  };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  if (typeof window !== 'undefined') window.rptUtils = Object.assign(window.rptUtils || {}, api);
-})();
+  if (typeof window !== 'undefined') {
+    window.rptUtils = Object.assign(window.rptUtils || {}, api);
+  }
+})(this);
