@@ -1732,16 +1732,16 @@ class RPTWebUI {
     renderFileActions(filename) {
         return `
             <div class="file-actions-cell">
-                <button class="file-action-button file-action-button--analyze"  data-action="select-and-analyze-file" data-arg-file="${filename}" data-old-onclick="rptUI.selectAndAnalyzeFile(\'${filename}\')">
+                <button class="file-action-button file-action-button--analyze"  data-action="select-and-analyze-file" data-arg-file="${filename}">
                     <span class="file-action-label">Analyze</span>
                 </button>
-                <button class="file-action-button file-action-button--download"  data-action="download-file" data-arg-file="${filename}" data-old-onclick="rptUI.downloadFile(\'${filename}\')">
+                <button class="file-action-button file-action-button--download"  data-action="download-file" data-arg-file="${filename}">
                     <span class="file-action-label">Download</span>
                 </button>
-                <button class="file-action-button file-action-button--info"  data-action="show-file-info" data-arg-file="${filename}" data-old-onclick="rptUI.showFileInfo(\'${filename}\')">
+                <button class="file-action-button file-action-button--info"  data-action="show-file-info" data-arg-file="${filename}">
                     <span class="file-action-label">Info</span>
                 </button>
-                <button class="file-action-button file-action-button--delete"  data-action="delete-file" data-arg-file="${filename}" data-old-onclick="rptUI.deleteFile(\'${filename}\')">
+                <button class="file-action-button file-action-button--delete"  data-action="delete-file" data-arg-file="${filename}">
                     <span class="file-action-label">Delete</span>
                 </button>
             </div>
@@ -3547,8 +3547,8 @@ class RPTWebUI {
     }
 
     renderActionButtons(taskId, status) {
-        if (status === 'running') return `<button class="btn-small btn-cancel"  data-action="cancel-task" data-arg-file="${taskId}" data-old-onclick="rptUI.cancelTask(\'${taskId}\')">Cancel</button>`;
-        if (status === 'finished' || status === 'completed') return `<button class="btn-small btn-view"  data-action="view-task-result" data-arg-file="${taskId}" data-old-onclick="rptUI.viewTaskResult(\'${taskId}\')">View</button>`;
+        if (status === 'running') return `<button class="btn-small btn-cancel"  data-action="cancel-task" data-arg-file="${taskId}">Cancel</button>`;
+        if (status === 'finished' || status === 'completed') return `<button class="btn-small btn-view"  data-action="view-task-result" data-arg-file="${taskId}">View</button>`;
         return '';
     }
 
