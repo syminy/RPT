@@ -29,9 +29,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run smoke checks (templates & data stability)
+      - name: Run preflight checks (templates & data stability)
+        # Ensure Python imports from the repo are available for the verifier
         run: |
-          bash ./scripts/run_smoke_checks_fixed.sh
+          PYTHONPATH=. bash ./scripts/run_preflight_checks.sh
 
       - name: Lint (ESLint)
         run: npm run lint --silent
