@@ -21,6 +21,12 @@
         case 'delete-all': if (window.rptUI && typeof window.rptUI.deleteAllFiles==='function') window.rptUI.deleteAllFiles(ev); break
         case 'close-preview': if (window.rptUI && typeof window.rptUI.closePreview==='function') window.rptUI.closePreview(ev); break
         case 'analyze-preview': if (window.rptUI && typeof window.rptUI.analyzeFromPreview==='function') window.rptUI.analyzeFromPreview(ev); break
+  // File actions delegated to window.rptUI when available
+  case 'download-file': { const fname=(el&&(el.dataset&&(el.dataset.argFile||el.dataset.file||el.dataset.filename)))||null; if (fname) { if (window.rptUI && typeof window.rptUI.downloadFile==='function') return window.rptUI.downloadFile(fname); return window.open('/files/'+encodeURIComponent(fname),'_blank'); } break }
+  case 'show-file-info': { const fname=(el&&(el.dataset&&(el.dataset.argFile||el.dataset.file||el.dataset.filename)))||null; if (fname) { if (window.rptUI && typeof window.rptUI.showFileInfo==='function') return window.rptUI.showFileInfo(fname); if (typeof window.showFileInfo==='function') return window.showFileInfo(fname); } break }
+  // Task actions delegated to window.rptUI
+  case 'cancel-task': { const tid=(el&&(el.dataset&&(el.dataset.taskId||el.dataset.tid||el.dataset.argFile)))||null; if (tid && window.rptUI && typeof window.rptUI.cancelTask==='function') return window.rptUI.cancelTask(tid); break }
+  case 'view-task-result': { const tid=(el&&(el.dataset&&(el.dataset.taskId||el.dataset.tid||el.dataset.argFile)))||null; if (tid && window.rptUI && typeof window.rptUI.viewTaskResult==='function') return window.rptUI.viewTaskResult(tid); break }
         // Config page delegated actions
         case 'save-config':
           if (typeof window.saveCurrentSection === 'function') {
@@ -59,6 +65,16 @@
   }
 
   document.addEventListener('click', function(ev){
+    const found = findAction(ev.target)
+    if (found) {
+      handleAction(found.action, found.el, ev)
+    }
+  }, false)
+
+  // Some JS environments / synthetic events may not trigger 'click' in the
+  // same way; attach pointerdown as a resilient fallback so tests that use
+  // element.click() or pointer events still delegate correctly.
+  document.addEventListener('pointerdown', function(ev){
     const found = findAction(ev.target)
     if (found) {
       handleAction(found.action, found.el, ev)
