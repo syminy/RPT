@@ -1,5 +1,5 @@
 // Core utilities extracted for module-based refactor
-(function (global) {
+(function (_global) {
   const n310SampleRatesHz = [
     250000,
     500000,
@@ -66,7 +66,7 @@
     return (value || '').toString().trim().toUpperCase();
   }
 
-  function formatPresetDescriptor(settings = {}, presets = {}) {
+  function formatPresetDescriptor(settings = {}, _presets = {}) {
     const parts = [];
     const fps = formatFps(settings.target_fps);
     if (fps) parts.push(fps);

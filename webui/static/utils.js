@@ -55,7 +55,7 @@
     return (value || '').toString().trim().toUpperCase();
   }
 
-  function formatPresetDescriptor(settings = {}, presets = {}) {
+  function formatPresetDescriptor(settings = {}, _presets = {}) {
     const parts = [];
     const fps = formatFps(settings.target_fps);
     if (fps) parts.push(fps);

@@ -1,5 +1,4 @@
-const fs = require('fs')
-const path = require('path')
+// fs/path not required for the test fixture; left out to avoid lint warnings
 
 beforeEach(() => {
   delete window.__RPT_actionDelegates

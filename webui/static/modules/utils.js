@@ -1,7 +1,7 @@
 // Wrapper for legacy `utils.js` that re-uses the extracted core module when
 // running in a CommonJS environment (Node/Jest). In browser environments
 // both files may be loaded; both assign to `window.rptUtils` for compatibility.
-(function (global) {
+(function (_global) {
   if (typeof module !== 'undefined' && module.exports) {
     // Use the extracted core module in Node/commonjs environments
     const core = require('./utils.core.js');
@@ -85,7 +85,7 @@
     return (value || '').toString().trim().toUpperCase();
   }
 
-  function formatPresetDescriptor(settings = {}, presets = {}) {
+  function formatPresetDescriptor(settings = {}, _presets = {}) {
     const parts = [];
     const fps = formatFps(settings.target_fps);
     if (fps) parts.push(fps);
