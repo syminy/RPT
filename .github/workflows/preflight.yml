@@ -3,36 +3,38 @@ name: Preflight checks
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   preflight:
-    name: Run preflight scripts and frontend tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
 
-      - name: Install npm deps
+      - name: Install frontend dependencies
         run: npm ci
 
-      - name: Run frontend Jest tests
-        working-directory: ${{ github.workspace }}
+      - name: Run frontend tests
         run: npm run test:frontend
 
-      - name: Run preflight shell script
-        # This runs the existing scripts/run_preflight_checks.sh which performs backup, onclick scan, data-stability checks
+      - name: Run preflight checks
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: bash scripts/run_preflight_checks.sh
 
-      - name: Upload preflight artifacts (logs)
+      - name: Upload preflight logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: preflight-logs
           path: |
-            ./preflight-logs/**
+            preflight-backup-*.log
+            preflight-onclick-scan-*.log
+          retention-days: 7
