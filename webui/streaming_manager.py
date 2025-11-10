@@ -4,6 +4,7 @@ import time
 import threading
 import logging
 import queue
+import os
 from typing import Dict, Optional
 from dataclasses import dataclass, field
 
@@ -123,18 +124,6 @@ class StreamingSignalAnalyzer:
         self.sessions[session_id] = session
         self.logger.info(f"Created streaming session {session_id} for file {filename}")
 
-        # enqueue an immediate diagnostic 'session_started' message onto the session queue
-        # This helps tests and clients get an early response even if file processing is delayed.
-        try:
-            if loop and loop.is_running():
-                start_msg = {"type": "session_started", "session_id": session_id}
-                loop.call_soon_threadsafe(lambda: asyncio.create_task(message_queue.put(start_msg)))
-        except Exception:
-            # non-fatal; just log and continue
-            self.logger.debug("Failed to enqueue session_started message for %s", session_id)
-
-        self.logger.info(f"Created streaming session {session_id} for file {filename}")
-
         # start background worker thread
         threading.Thread(
             target=self._process_file_worker,
@@ -143,10 +132,12 @@ class StreamingSignalAnalyzer:
         ).start()
 
         # enqueue an immediate diagnostic 'session_started' message onto the session queue
-        # This helps tests and clients get an early response even if file processing is delayed.
+        # Controlled via environment variable RPT_STREAM_SESSION_ACK (true/false). Defaults to True
         try:
-            start_msg = {"type": "session_started", "session_id": session_id}
-            session.message_queue.put_from_thread(start_msg)
+            ack = os.getenv('RPT_STREAM_SESSION_ACK', 'true').lower() in ('1', 'true', 'yes')
+            if ack:
+                start_msg = {"type": "session_started", "session_id": session_id}
+                session.message_queue.put_from_thread(start_msg)
         except Exception:
             # non-fatal; just log and continue
             self.logger.debug("Failed to enqueue session_started message for %s", session_id)
