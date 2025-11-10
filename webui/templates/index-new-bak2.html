@@ -488,8 +488,8 @@
                         </div>
                     </div>
                     <div class="spectrum-scan-buttons">
-                        <button type="button" class="btn btn-primary" id="start-scan-btn" data-action="start-spectrum-scan" data-old-onclick="startSpectrumScan()">Start Scan</button>
-                        <button type="button" class="btn" id="stop-scan-btn" data-action="stop-spectrum-scan" data-old-onclick="stopSpectrumScan()">Stop Scan</button>
+                        <button type="button" class="btn btn-primary" id="start-scan-btn" data-action="start-spectrum-scan">Start Scan</button>
+                        <button type="button" class="btn" id="stop-scan-btn" data-action="stop-spectrum-scan">Stop Scan</button>
                            <button type="button" class="btn btn-primary" id="start-scan-btn" data-action="start-scan">Start Scan</button>
                            <button type="button" class="btn" id="stop-scan-btn" data-action="stop-scan">Stop Scan</button>
                     </div>
@@ -759,9 +759,9 @@
                 <div class="file-actions">
                     <input type="file" id="fileInput" accept=".h5,.dat,.complex,.raw,.bin,.wav,.csv,.npy" multiple style="display: none;">
                     <button data-action="upload-files" class="btn btn-primary">Upload Files</button>
-                    <button data-action="refresh-list" data-old-onclick="refreshFileListDebug()" class="btn">Refresh List</button>
-                    <button data-action="clear-plots" data-old-onclick="rptUI.clearAllPlots()" class="btn">Clear Plots</button>
-                    <button data-action="delete-all" data-old-onclick="rptUI.deleteAllFiles()" class="btn">Delete All</button>
+                    <button data-action="refresh-list" class="btn">Refresh List</button>
+                    <button data-action="clear-plots" class="btn">Clear Plots</button>
+                    <button data-action="delete-all" class="btn">Delete All</button>
                           <button data-action="upload-files" class="btn btn-primary">Upload Files</button>
                               <button data-action="upload-files" class="btn btn-primary">Upload Files</button>
                               <button data-action="refresh-list" class="btn">Refresh List</button>
@@ -881,8 +881,8 @@
                 <div class="panel-header">
                     <h3>📊 File Preview</h3>
                     <div>
-                        <button class="btn btn-sm" data-action="close-preview" data-old-onclick="rptUI.closePreview()">Close</button>
-                        <button class="btn btn-sm btn-primary" data-action="analyze-preview" data-old-onclick="rptUI.analyzeFromPreview()">Full Analysis</button>
+                        <button class="btn btn-sm" data-action="close-preview">Close</button>
+                        <button class="btn btn-sm btn-primary" data-action="analyze-preview">Full Analysis</button>
                            <button class="btn btn-sm" data-action="close-preview">Close</button>
                            <button class="btn btn-sm btn-primary" data-action="analyze-preview">Full Analysis</button>
                     </div>

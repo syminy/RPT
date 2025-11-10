@@ -5200,9 +5200,8 @@ function setupFileUpload() {
 
 function setupRefreshButton() {
     // try to find a button wired to our refresh debug wrapper
-    // prefer preserved fallback attribute, then prefer the new data-action hook (avoid raw inline onclick selectors)
-    let refreshBtn = document.querySelector('button[data-old-onclick*="refreshFileListDebug("]')
-        || document.querySelector('button[data-action="refresh-list"], button[data-action*="refresh-list"]');
+    // prefer the new data-action hook, then fall back to a textual match
+    let refreshBtn = document.querySelector('button[data-action="refresh-list"], button[data-action*="refresh-list"]');
     if (!refreshBtn) refreshBtn = Array.from(document.querySelectorAll('button')).find(b => /refresh/i.test(b.textContent || '') );
     if (!refreshBtn) { console.error('❌ [DEBUG] setupRefreshButton: Refresh button not found'); return; }
     if (refreshBtn.dataset.debugBound === '1') return;
