@@ -29,9 +29,13 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run smoke checks (templates & data stability)
+      - name: Run preflight checks (templates & data stability)
+        # Ensure Python imports from the repo are available for the verifier
         run: |
-          bash ./scripts/run_smoke_checks_fixed.sh
+          # Run the strict "no data-old-*" checker restored in Phase 0.
+          # The script exits non-zero if any data-old-* attributes are found,
+          # which will fail the job and block merges that re-introduce fallbacks.
+          PYTHONPATH=. python3 scripts/check-no-data-old.py
 
       - name: Lint (ESLint)
         run: npm run lint --silent
@@ -42,6 +46,8 @@ jobs:
   python-tests:
     name: Python unit tests
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     needs: frontend
     strategy:
       matrix:
@@ -66,9 +72,38 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          # Ensure test runner and coverage are available on PATH; call via `python -m pytest` below
+          # Install dependencies from requirements.txt. Fail early if the file is missing so CI signals config issues.
+          python -m pip install -r requirements.txt
+          # Ensure test runner and coverage are available
           python -m pip install pytest pytest-cov
+
+      - name: Start test server (uvicorn)
+        env:
+          PYTHONPATH: .
+        run: |
+          echo "Installing uvicorn if missing and starting server in background"
+          # Install uvicorn into the same Python runtime
+          python -m pip install --upgrade pip
+          python -m pip install uvicorn
+
+          # Start uvicorn in background, write logs to uvicorn.log
+          nohup python -m uvicorn webui.app:app --host 127.0.0.1 --port 8000 --log-level warning &> uvicorn.log &
+
+          # Wait for the server to become reachable (up to ~30s)
+          echo "Waiting for test server to respond on http://127.0.0.1:8000/api/status"
+          for i in $(seq 1 30); do
+            if curl -sS http://127.0.0.1:8000/api/status >/dev/null 2>&1; then
+              echo "Test server ready"
+              break
+            fi
+            sleep 1
+          done
+
+          # If server not ready, dump logs and fail the step so CI stops (pytest would fail anyway)
+          if ! curl -sS http://127.0.0.1:8000/api/status >/dev/null 2>&1; then
+            echo "Test server failed to start; tail of uvicorn.log:" && sed -n '1,400p' uvicorn.log || true
+            exit 1
+          fi
 
       - name: Run pytest (skip integration/hardware tests)
         run: |
@@ -84,15 +119,15 @@ jobs:
 
       - name: Upload coverage to Codecov
         # Only attempt upload when a Codecov token is provided to avoid failing the job in public forks
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
+        if: ${{ env.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v4
         with:
           files: coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
       - name: Persist coverage.xml when Codecov token is missing
-        if: ${{ secrets.CODECOV_TOKEN == '' }}
+        if: ${{ env.CODECOV_TOKEN == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage-xml

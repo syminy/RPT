@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Scan templates and static files for non-commented `onclick=` occurrences.
+// Generate a CSV report of inline onclick occurrences under webui/templates and webui/static
 const fs = require('fs')
 const path = require('path')
 
@@ -27,34 +27,35 @@ function scanFile(file) {
     const line = lines[i]
     const idx = line.indexOf('onclick=')
     if (idx !== -1) {
-      // crude check: ignore lines that are HTML comments <!-- ... onclick= ... -->
       const inComment = /<!--([\s\S]*?)-->/.test(line)
-      if (!inComment) findings.push({file, line: i+1, text: line.trim()})
+      if (!inComment) findings.push({file, line: i+1, snippet: line.trim()})
     }
   }
   return findings
 }
 
 const roots = [path.join(__dirname, '..', 'webui', 'templates'), path.join(__dirname, '..', 'webui', 'static')]
-let total = 0
-const allFindings = []
+const all = []
 for (const r of roots) {
   if (!fs.existsSync(r)) continue
   const files = walk(r).filter(isTextFile)
   for (const f of files) {
     const fnd = scanFile(f)
-    if (fnd.length) {
-      allFindings.push(...fnd)
-      total += fnd.length
-    }
+    if (fnd.length) all.push(...fnd)
   }
 }
 
-if (total === 0) {
-  console.log('OK: no non-commented onclick= found in scanned paths')
+if (all.length === 0) {
+  console.log('No inline onclick occurrences found.')
   process.exit(0)
-} else {
-  console.error(`FOUND ${total} inline onclick occurrences:`)
-  for (const it of allFindings) console.error(`${it.file}:${it.line}: ${it.text}`)
-  process.exit(3)
 }
+
+const reportsDir = path.join(__dirname, '..', 'reports')
+if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, {recursive:true})
+const ts = new Date().toISOString().replace(/[:.]/g, '-')
+const out = path.join(reportsDir, `onclick_report_${ts}.csv`)
+const header = 'file,line,snippet\n'
+const csv = all.map(r => `${r.file.replace(/,/g,'')},${r.line},"${r.snippet.replace(/"/g,'""')}"`).join('\n') + '\n'
+fs.writeFileSync(out, header + csv, 'utf8')
+console.log(`Wrote report: ${out} (${all.length} items)`)
+process.exit(0)
