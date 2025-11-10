@@ -1,1 +1,6 @@
 node_modules/
+
+# Ignore local CI watch scripts and logs
+scripts/ci_watch.sh
+var/ci_watch.log
+backups/
