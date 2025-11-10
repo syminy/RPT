@@ -102,11 +102,11 @@
 
             <!-- 全局操作 -->
             <div class="config-actions">
-                <button class="btn btn-primary" data-action="save-config">保存当前章节</button>
-                <button class="btn btn-success" data-action="save-all-config">保存所有配置</button>
-                <button class="btn btn-warning" data-action="reset-config">重置当前章节</button>
-                <button class="btn btn-danger" data-action="reset-all-config">重置所有配置</button>
-                <button class="btn btn-info" data-action="create-backup">创建备份</button>
+                <button class="btn btn-primary" onclick="saveCurrentSection()">保存当前章节</button>
+                <button class="btn btn-success" onclick="saveAllConfig()">保存所有配置</button>
+                <button class="btn btn-warning" onclick="resetCurrentSection()">重置当前章节</button>
+                <button class="btn btn-danger" onclick="resetAllConfig()">重置所有配置</button>
+                <button class="btn btn-info" onclick="createBackup()">创建备份</button>
             </div>
         </div>
     </div>
