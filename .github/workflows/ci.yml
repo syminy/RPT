@@ -89,13 +89,27 @@ jobs:
           python -m pip install pytest pytest-cov
 
       - name: Start test server (uvicorn)
+        env:
+          PYTHONPATH: .
         run: |
-          echo "Installing uvicorn if missing and starting server in background"
+          echo "Installing uvicorn if missing and verifying import of webui.app before starting server"
           # Install uvicorn into the same Python runtime
           python -m pip install --upgrade pip
           python -m pip install uvicorn
 
-          # Start uvicorn in background, write logs to uvicorn.log
+          # Run a direct import check to capture full traceback if imports fail
+          echo "Checking import of webui.app (will print full traceback on failure)"
+          python - <<'PY'
+import importlib, traceback, sys
+try:
+    importlib.import_module('webui.app')
+    print('Import check: OK')
+except Exception:
+    traceback.print_exc()
+    sys.exit(2)
+PY
+
+          # Start uvicorn in background, write logs to uvicorn.log. Ensure PYTHONPATH is set so package imports resolve.
           nohup python -m uvicorn webui.app:app --host 127.0.0.1 --port 8000 --log-level warning &> uvicorn.log &
 
           # Wait for the server to become reachable (up to ~30s)
@@ -110,7 +124,7 @@ jobs:
 
           # If server not ready, dump logs and fail the step so CI stops (pytest would fail anyway)
           if ! curl -sS http://127.0.0.1:8000/api/status >/dev/null 2>&1; then
-            echo "Test server failed to start; tail of uvicorn.log:" && sed -n '1,200p' uvicorn.log || true
+            echo "Test server failed to start; tail of uvicorn.log:" && sed -n '1,400p' uvicorn.log || true
             exit 1
           fi
 
