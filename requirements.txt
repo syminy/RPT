@@ -1,3 +1,8 @@
 pytest==7.4.0
 pytest-cov==4.0.0
-# Add additional Python test/runtime deps here if CI needs them
+# Core scientific/runtime dependencies required by the test suite
+numpy==1.26.0
+scipy==1.11.0
+h5py==3.10.0
+# Optional/near-future deps (uncomment if tests require them)
+# pandas==2.0.3
