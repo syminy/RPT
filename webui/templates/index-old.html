@@ -113,8 +113,8 @@
                     <div class="spectrum-scan-controls">
                         <span id="scanStatus" class="badge bg-info">就绪</span>
                         <div class="preset-info" id="scanPresetSummary">SR -- • RBW -- • Span -- • FFT -- • Seg -- • Window --</div>
-                        <button type="button" class="btn btn-primary btn-sm" id="start-scan-btn" data-action="start-scan" data-old-onclick="startSpectrumScan()">开始扫描</button>
-                        <button type="button" class="btn btn-danger btn-sm" id="stop-scan-btn" data-action="stop-scan" data-old-onclick="stopSpectrumScan()">停止扫描</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="start-scan-btn" data-action="start-scan">开始扫描</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="stop-scan-btn" data-action="stop-scan">停止扫描</button>
                     </div>
                 </div>
                 <form id="spectrumScanForm" class="spectrum-scan-form" onsubmit="event.preventDefault(); startSpectrumScan();">
@@ -231,10 +231,10 @@
                 </div>
                 <div class="file-actions">
                     <input type="file" id="fileInput" accept=".h5,.dat,.complex,.raw,.bin,.wav,.csv,.npy" multiple style="display: none;">
-                    <button data-action="upload-files" data-old-onclick="document.getElementById('fileInput').click()">Upload Files</button>
-                    <button data-action="refresh-list" data-old-onclick="refreshFileListDebug()">Refresh List</button>
-                    <button data-action="clear-plots" data-old-onclick="rptUI.clearAllPlots()">Clear Plots</button>
-                    <button data-action="delete-all" data-old-onclick="rptUI.deleteAllFiles()" class="btn-danger">Delete All</button>
+                    <button data-action="upload-files">Upload Files</button>
+                    <button data-action="refresh-list">Refresh List</button>
+                    <button data-action="clear-plots">Clear Plots</button>
+                    <button data-action="delete-all" class="btn-danger">Delete All</button>
                 </div>
 
                 <div class="file-table-container">
@@ -418,8 +418,8 @@
                 <div class="panel-header">
                     <h3>📊 File Preview</h3>
                     <div>
-                        <button class="btn btn-sm btn-secondary" data-action="close-preview" data-old-onclick="rptUI.closePreview()">Close</button>
-                        <button class="btn btn-sm btn-primary" data-action="analyze-preview" data-old-onclick="rptUI.analyzeFromPreview()">Full Analysis</button>
+                        <button class="btn btn-sm btn-secondary" data-action="close-preview">Close</button>
+                        <button class="btn btn-sm btn-primary" data-action="analyze-preview">Full Analysis</button>
                     </div>
                 </div>
                 </div>
