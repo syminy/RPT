@@ -112,6 +112,19 @@ jobs:
           # Use python -m pytest to avoid relying on the pytest console_script being on PATH
           python -m pytest -q --maxfail=1 --disable-warnings --cov=./ --cov-report=xml:coverage.xml tests -k "not integration and not webui and not spectrum and not realtime"
 
+      - name: Debug - Capture pytest failure details
+        if: ${{ failure() }}
+        env:
+          PYTHONPATH: .
+        run: |
+          echo "=== Python Environment ==="
+          python -c "import sys; print('Python path:', sys.path)"
+          echo "=== Installed Packages ==="
+          python -m pip list
+          echo "=== Pytest Full Output ==="
+          # Run a verbose pytest pass to capture full traceback; don't fail this debug step
+          PYTHONPATH=. python -m pytest tests/ -v --tb=long || true
+
       - name: Upload pytest artifacts
         if: always()
         uses: actions/upload-artifact@v4
